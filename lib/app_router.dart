@@ -1,6 +1,8 @@
 // app_router.dart
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:prack_10/features/auth/screens/login_screen.dart';
+import 'package:prack_10/features/auth/screens/register_screen.dart';
 import 'package:prack_10/features/habits/screens/habits_screen.dart';
 import 'package:prack_10/features/motivations/screens/motivation_screen.dart';
 import 'package:prack_10/features/notes/screens/notes_list_screen.dart';
@@ -23,7 +25,7 @@ import 'features/taskmanager/screens/tasks_list_screen.dart';
 
 class AppRouter {
   late final GoRouter router = GoRouter(
-    initialLocation: '/',
+    initialLocation: '/login',
     routes: [
       GoRoute(
         path: '/',
@@ -89,8 +91,12 @@ class AppRouter {
         ),
       ),
       GoRoute(
-        path: '/motivation',
-        builder: (context, state) => MotivationScreen(),
+        path: '/login',
+        builder: (context, state) => LoginScreen(),
+      ),
+      GoRoute(
+        path: '/register',
+        builder: (context, state) => RegisterScreen(),
       ),
     ],
   );
