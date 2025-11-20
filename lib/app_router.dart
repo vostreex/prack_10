@@ -1,4 +1,3 @@
-// app_router.dart
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:prack_10/features/auth/screens/login_screen.dart';
@@ -36,6 +35,8 @@ class AppRouter {
         path: '/',
         builder: (context, state) => const MainMenuScreen(),
       ),
+
+
       GoRoute(
         path: '/notes',
         builder: (context, state) => NotesListScreen(),
@@ -53,10 +54,6 @@ class AppRouter {
         builder: (context, state) => ArchiveScreen(),
       ),
       GoRoute(
-        path: '/settings',
-        builder: (context, state) =>  SettingsScreen(),
-      ),
-      GoRoute(
         path: '/edit/:id',
         builder: (context, state) {
           final id = state.pathParameters['id']!;
@@ -64,6 +61,8 @@ class AppRouter {
           return EditNoteScreen(index: id, note: note);
         },
       ),
+
+
       GoRoute(
         path: '/tasks',
         builder: (context, state) => TasksListScreen(),
@@ -81,6 +80,8 @@ class AppRouter {
           return TaskDetailsScreen(task: task);
         },
       ),
+
+
       GoRoute(
         path: '/habits',
         builder: (context, state) => HabitsScreen(),
@@ -92,13 +93,17 @@ class AppRouter {
       GoRoute(
         path: '/habits/:id',
         builder: (context, state) => HabitDetailsScreen(
-          habit: state.extra as Habit
+            habit: state.extra as Habit
         ),
       ),
+
+
       GoRoute(
         path: '/motivation',
         builder: (context, state) => MotivationScreen(),
       ),
+
+
       GoRoute(
         path: '/login',
         builder: (context, state) => LoginScreen(),
@@ -107,6 +112,8 @@ class AppRouter {
         path: '/register',
         builder: (context, state) => RegisterScreen(),
       ),
+
+
       GoRoute(
         path: '/reflections',
         builder: (context, state) => ReflectionsListScreen(),
@@ -121,9 +128,16 @@ class AppRouter {
           reflection: state.extra as ReflectionEntry,
         ),
       ),
+
+
       GoRoute(
         path: '/onboarding',
         builder: (context, state) => OnboardingScreen(),
+      ),
+
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) =>  SettingsScreen(),
       ),
       GoRoute(
         path: '/profile',

@@ -5,31 +5,14 @@ import 'package:go_router/go_router.dart';
 import '../state/add_habit_store.dart';
 import '../models/habit.dart';
 
-class AddHabitScreen extends StatefulWidget {
+class AddHabitScreen extends StatelessWidget {
   const AddHabitScreen({super.key});
-  @override
-  State<AddHabitScreen> createState() => _AddHabitScreenState();
-}
-class _AddHabitScreenState extends State<AddHabitScreen> {
-  late final AddHabitStore store;
-  late final TextEditingController _controller;
-  @override
-  void initState() {
-    super.initState();
-    store = AddHabitStore();
-    _controller = TextEditingController();
-    // Слушатель — только один раз!
-    _controller.addListener(() {
-      store.setTitle(_controller.text);
-    });
-  }
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+
   @override
   Widget build(BuildContext context) {
+
+    final store = AddHabitStore();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Новая привычка'),
@@ -41,17 +24,23 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          TextField(
-            controller: _controller,
-            textCapitalization: TextCapitalization.sentences,
-            decoration: InputDecoration(
-              labelText: 'Название привычки',
-              hintText: 'Пить воду, Читать 30 минут, Медитация',
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-              prefixIcon: const Icon(Icons.edit),
+          // Поле ввода названия — напрямую пишем в store
+          Observer(
+            builder: (_) => TextField(
+              onChanged: store.setTitle,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: InputDecoration(
+                labelText: 'Название привычки',
+                hintText: 'Пить воду, Читать 30 минут, Медитация',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                prefixIcon: const Icon(Icons.edit),
+              ),
             ),
           ),
+
           const SizedBox(height: 32),
+
+          // Большой выбранный эмодзи
           Observer(
             builder: (_) => Center(
               child: Container(
@@ -67,14 +56,16 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
               ),
             ),
           ),
+
           const SizedBox(height: 32),
           const Text('Выберите эмодзи', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+
           const SizedBox(height: 12),
           Observer(
             builder: (_) {
-              // Force reaction tracking for MobX Observer
-              final String selectedEmoji = store.selectedEmoji;
-              final Color selectedColor = store.selectedColor;
+              final selectedEmoji = store.selectedEmoji;
+              final selectedColor = store.selectedColor;
+
               return GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -87,16 +78,17 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                 itemCount: store.availableEmojis.length,
                 itemBuilder: (context, i) {
                   final emoji = store.availableEmojis[i];
-                  final isSelected = store.selectedEmoji == emoji;
+                  final isSelected = emoji == selectedEmoji;
+
                   return GestureDetector(
                     onTap: () => store.setEmoji(emoji),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       decoration: BoxDecoration(
-                        color: isSelected ? store.selectedColor.withOpacity(0.2) : Colors.grey[100],
+                        color: isSelected ? selectedColor.withOpacity(0.2) : Colors.grey[100],
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: isSelected ? store.selectedColor : Colors.transparent,
+                          color: isSelected ? selectedColor : Colors.transparent,
                           width: 3,
                         ),
                       ),
@@ -112,6 +104,8 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
           const SizedBox(height: 32),
           const Text('Выберите цвет', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
+
+          // Палитра цветов
           Observer(
             builder: (_) => Wrap(
               spacing: 16,
@@ -146,7 +140,10 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
               }).toList(),
             ),
           ),
+
           const SizedBox(height: 40),
+
+          // Кнопка создания
           Observer(
             builder: (_) => ElevatedButton(
               onPressed: store.canCreate
