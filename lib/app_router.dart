@@ -9,15 +9,20 @@ import 'package:prack_10/features/notes/screens/notes_list_screen.dart';
 import 'package:prack_10/features/notes/screens/add_note_screen.dart';
 import 'package:prack_10/features/notes/screens/favorites_screen.dart';
 import 'package:prack_10/features/notes/screens/archive_screen.dart';
-import 'package:prack_10/features/notes/screens/settings_screen.dart';
+import 'package:prack_10/features/settings/screen/settings_screen.dart';
 import 'package:prack_10/features/notes/screens/edit_note_screen.dart';
 import 'package:prack_10/features/notes/models/note.dart';
 import 'package:prack_10/features/main_screen.dart';
 import 'package:mobx/mobx.dart';
+import 'features/settings/screen/profile_screen.dart';
 import 'features/habits/models/habit.dart';
 import 'features/habits/screens/add_habit_screen.dart';
 import 'features/habits/screens/habit_details_screen.dart';
-import 'features/habits/state/habits_store.dart';
+import 'features/onboarding/screens/onboarding_screen.dart';
+import 'features/reflection/models/reflection_entry.dart';
+import 'features/reflection/screens/edit_reflections_screen.dart';
+import 'features/reflection/screens/new_reflection_screen.dart';
+import 'features/reflection/screens/reflection_list_screen.dart';
 import 'features/taskmanager/models/task.dart';
 import 'features/taskmanager/screens/add_task_screen.dart';
 import 'features/taskmanager/screens/task_details_screen.dart';
@@ -25,7 +30,7 @@ import 'features/taskmanager/screens/tasks_list_screen.dart';
 
 class AppRouter {
   late final GoRouter router = GoRouter(
-    initialLocation: '/login',
+    initialLocation: '/onboarding',
     routes: [
       GoRoute(
         path: '/',
@@ -49,7 +54,7 @@ class AppRouter {
       ),
       GoRoute(
         path: '/settings',
-        builder: (context, state) => const SettingsScreen(),
+        builder: (context, state) =>  SettingsScreen(),
       ),
       GoRoute(
         path: '/edit/:id',
@@ -91,12 +96,38 @@ class AppRouter {
         ),
       ),
       GoRoute(
+        path: '/motivation',
+        builder: (context, state) => MotivationScreen(),
+      ),
+      GoRoute(
         path: '/login',
         builder: (context, state) => LoginScreen(),
       ),
       GoRoute(
         path: '/register',
         builder: (context, state) => RegisterScreen(),
+      ),
+      GoRoute(
+        path: '/reflections',
+        builder: (context, state) => ReflectionsListScreen(),
+      ),
+      GoRoute(
+        path: '/reflection/add',
+        builder: (context, state) => ReflectionAddScreen(),
+      ),
+      GoRoute(
+        path: '/reflection/edit/:id',
+        builder: (context, state) => ReflectionEditScreen(
+          reflection: state.extra as ReflectionEntry,
+        ),
+      ),
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => OnboardingScreen(),
+      ),
+      GoRoute(
+        path: '/profile',
+        builder: (context, state) => ProfileScreen(),
       ),
     ],
   );
