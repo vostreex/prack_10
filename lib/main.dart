@@ -17,11 +17,11 @@ void main() async {
 
   GetIt.I.registerSingleton<SettingsStore>(SettingsStore());
 
-  GetIt.I.registerSingleton<ObservableList<Note>>(ObservableList<Note>());
-  GetIt.I.registerSingleton<ObservableList<Task>>(ObservableList<Task>());
-  GetIt.I.registerSingleton<ObservableList<Habit>>(ObservableList<Habit>());
-  GetIt.I.registerSingleton<ObservableList<User>>(ObservableList<User>());
-  GetIt.I.registerSingleton<ObservableList<ReflectionEntry>>(ObservableList<ReflectionEntry>());
+  GetIt.I.registerLazySingleton<ObservableList<Note>>(() => ObservableList<Note>());
+  GetIt.I.registerLazySingleton<ObservableList<Task>>(() => ObservableList<Task>());
+  GetIt.I.registerLazySingleton<ObservableList<Habit>>(() => ObservableList<Habit>());
+  GetIt.I.registerLazySingleton<ObservableList<User>>(() => ObservableList<User>());
+  GetIt.I.registerLazySingleton<ObservableList<ReflectionEntry>>(() => ObservableList<ReflectionEntry>());
 
   runApp(MyApp());
 }

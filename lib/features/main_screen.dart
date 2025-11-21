@@ -45,7 +45,7 @@ class MainMenuScreen extends StatelessWidget {
                   // Сетка карточек
                   Expanded(
                     child: GridView.count(
-                      crossAxisCount: 2,
+                      crossAxisCount: 3,
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
                       childAspectRatio: 1.1,

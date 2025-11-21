@@ -58,7 +58,6 @@ class NotesListScreen extends StatelessWidget {
         title: const Text("Список заметок"),
         actions: [
           IconButton(icon: const Icon(Icons.home), onPressed: () => context.push('/')),
-          IconButton(icon: const Icon(Icons.settings), onPressed: () => context.push('/settings')),
           IconButton(icon: const Icon(Icons.archive), onPressed: () => context.push('/archive')),
           IconButton(icon: const Icon(Icons.favorite), onPressed: () => context.push('/favorites')),
         ],

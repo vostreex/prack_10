@@ -1,4 +1,3 @@
-// state/task_details_store.dart
 import 'package:mobx/mobx.dart';
 import '../models/task.dart';
 import '../models/task_item.dart';
