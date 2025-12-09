@@ -1,27 +1,150 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:prack_10/features/taskmanager/models/task.dart';
-import 'app.dart';
-import 'features/auth/model/user.dart';
-import 'features/habits/models/habit.dart';
-import 'features/notes/models/note.dart';
-import 'package:mobx/mobx.dart';
+import 'package:prack_10/core/models/task.dart';
+import 'package:prack_10/ui/app.dart';
+import 'package:prack_10/core/models/user.dart';
+import 'package:prack_10/core/models/habit.dart';
+import 'package:prack_10/core/models/note.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'features/reflection/models/reflection_entry.dart';
-import 'features/settings/state/settings_store.dart';
+import 'package:prack_10/core/models/reflection_entry.dart';
+import 'package:prack_10/ui/features/settings/state/settings_store.dart';
+import 'package:prack_10/ui/features/motivations/state/motivation_store.dart';
+import 'package:prack_10/data/datasources/note_local_datasource.dart';
+import 'package:prack_10/data/datasources/task_local_datasource.dart';
+import 'package:prack_10/data/datasources/habit_local_datasource.dart';
+import 'package:prack_10/data/datasources/user_local_datasource.dart';
+import 'package:prack_10/data/datasources/reflection_local_datasource.dart';
+import 'package:prack_10/data/datasources/motivation_local_datasource.dart';
+import 'package:prack_10/data/datasources/settings_local_datasource.dart';
+import 'package:prack_10/data/repositories/note_repository_impl.dart';
+import 'package:prack_10/data/repositories/task_repository_impl.dart';
+import 'package:prack_10/data/repositories/habit_repository_impl.dart';
+import 'package:prack_10/data/repositories/user_repository_impl.dart';
+import 'package:prack_10/data/repositories/reflection_repository_impl.dart';
+import 'package:prack_10/data/repositories/settings_repository_impl.dart';
+import 'package:prack_10/data/repositories/motivation_repository_impl.dart';
+import 'package:prack_10/domain/repositories/note_repository.dart';
+import 'package:prack_10/domain/repositories/task_repository.dart';
+import 'package:prack_10/domain/repositories/habit_repository.dart';
+import 'package:prack_10/domain/repositories/user_repository.dart';
+import 'package:prack_10/domain/repositories/reflection_repository.dart';
+import 'package:prack_10/domain/repositories/settings_repository.dart';
+import 'package:prack_10/domain/repositories/motivation_repository.dart';
+import 'package:prack_10/domain/usecases/notes/notes_usecases.dart';
+import 'package:prack_10/domain/usecases/tasks/tasks_usecases.dart';
+import 'package:prack_10/domain/usecases/habits/habits_usecases.dart';
+import 'package:prack_10/domain/usecases/users/users_usecases.dart';
+import 'package:prack_10/domain/usecases/reflections/reflections_usecases.dart';
+import 'package:prack_10/domain/usecases/settings/settings_usecases.dart';
+import 'package:prack_10/domain/usecases/motivations/motivations_usecases.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('ru', null);
   await initializeDateFormatting('en', null);
 
-  GetIt.I.registerSingleton<SettingsStore>(SettingsStore());
+  // Register Lists first (before data sources to avoid circular dependency)
+  final notesList = <Note>[];
+  final tasksList = <Task>[];
+  final habitsList = <Habit>[];
+  final usersList = <User>[];
+  final reflectionsList = <ReflectionEntry>[];
 
-  GetIt.I.registerLazySingleton<ObservableList<Note>>(() => ObservableList<Note>());
-  GetIt.I.registerLazySingleton<ObservableList<Task>>(() => ObservableList<Task>());
-  GetIt.I.registerLazySingleton<ObservableList<Habit>>(() => ObservableList<Habit>());
-  GetIt.I.registerLazySingleton<ObservableList<User>>(() => ObservableList<User>());
-  GetIt.I.registerLazySingleton<ObservableList<ReflectionEntry>>(() => ObservableList<ReflectionEntry>());
+  GetIt.I.registerSingleton<List<Note>>(notesList);
+  GetIt.I.registerSingleton<List<Task>>(tasksList);
+  GetIt.I.registerSingleton<List<Habit>>(habitsList);
+  GetIt.I.registerSingleton<List<User>>(usersList);
+  GetIt.I.registerSingleton<List<ReflectionEntry>>(reflectionsList);
+
+  // Register data sources
+  GetIt.I.registerLazySingleton<NoteLocalDataSource>(() => NoteLocalDataSource());
+  GetIt.I.registerLazySingleton<TaskLocalDataSource>(() => TaskLocalDataSource());
+  GetIt.I.registerLazySingleton<HabitLocalDataSource>(() => HabitLocalDataSource());
+  GetIt.I.registerLazySingleton<UserLocalDataSource>(() => UserLocalDataSource());
+  GetIt.I.registerLazySingleton<ReflectionLocalDataSource>(() => ReflectionLocalDataSource());
+  GetIt.I.registerLazySingleton<MotivationLocalDataSource>(() => MotivationLocalDataSource());
+  GetIt.I.registerLazySingleton<SettingsLocalDataSource>(() => SettingsLocalDataSource());
+
+  // Register repositories
+  final noteRepository = NoteRepositoryImpl(GetIt.I<NoteLocalDataSource>());
+  final taskRepository = TaskRepositoryImpl(GetIt.I<TaskLocalDataSource>());
+  final habitRepository = HabitRepositoryImpl(GetIt.I<HabitLocalDataSource>());
+  final userRepository = UserRepositoryImpl(GetIt.I<UserLocalDataSource>());
+  final reflectionRepository = ReflectionRepositoryImpl(GetIt.I<ReflectionLocalDataSource>());
+  final settingsRepository = SettingsRepositoryImpl(GetIt.I<SettingsLocalDataSource>());
+  final motivationRepository = MotivationRepositoryImpl(GetIt.I<MotivationLocalDataSource>());
+
+  GetIt.I.registerLazySingleton<NoteRepository>(() => noteRepository);
+  GetIt.I.registerLazySingleton<TaskRepository>(() => taskRepository);
+  GetIt.I.registerLazySingleton<HabitRepository>(() => habitRepository);
+  GetIt.I.registerLazySingleton<UserRepository>(() => userRepository);
+  GetIt.I.registerLazySingleton<ReflectionRepository>(() => reflectionRepository);
+  GetIt.I.registerLazySingleton<SettingsRepository>(() => settingsRepository);
+  GetIt.I.registerLazySingleton<MotivationRepository>(() => motivationRepository);
+
+  // Register use cases for Notes
+  GetIt.I.registerLazySingleton<GetNotesUseCase>(() => GetNotesUseCase(noteRepository));
+  GetIt.I.registerLazySingleton<GetNoteByIdUseCase>(() => GetNoteByIdUseCase(noteRepository));
+  GetIt.I.registerLazySingleton<AddNoteUseCase>(() => AddNoteUseCase(noteRepository));
+  GetIt.I.registerLazySingleton<UpdateNoteUseCase>(() => UpdateNoteUseCase(noteRepository));
+  GetIt.I.registerLazySingleton<DeleteNoteUseCase>(() => DeleteNoteUseCase(noteRepository));
+  GetIt.I.registerLazySingleton<ToggleFavoriteNoteUseCase>(() => ToggleFavoriteNoteUseCase(noteRepository));
+  GetIt.I.registerLazySingleton<ToggleArchiveNoteUseCase>(() => ToggleArchiveNoteUseCase(noteRepository));
+  GetIt.I.registerLazySingleton<GetCategoriesUseCase>(() => GetCategoriesUseCase(noteRepository));
+
+  // Register use cases for Tasks
+  GetIt.I.registerLazySingleton<GetTasksUseCase>(() => GetTasksUseCase(taskRepository));
+  GetIt.I.registerLazySingleton<GetTaskByIdUseCase>(() => GetTaskByIdUseCase(taskRepository));
+  GetIt.I.registerLazySingleton<AddTaskUseCase>(() => AddTaskUseCase(taskRepository));
+  GetIt.I.registerLazySingleton<UpdateTaskUseCase>(() => UpdateTaskUseCase(taskRepository));
+  GetIt.I.registerLazySingleton<DeleteTaskUseCase>(() => DeleteTaskUseCase(taskRepository));
+
+  // Register use cases for Habits
+  GetIt.I.registerLazySingleton<GetHabitsUseCase>(() => GetHabitsUseCase(habitRepository));
+  GetIt.I.registerLazySingleton<GetHabitByIdUseCase>(() => GetHabitByIdUseCase(habitRepository));
+  GetIt.I.registerLazySingleton<AddHabitUseCase>(() => AddHabitUseCase(habitRepository));
+  GetIt.I.registerLazySingleton<UpdateHabitUseCase>(() => UpdateHabitUseCase(habitRepository));
+  GetIt.I.registerLazySingleton<DeleteHabitUseCase>(() => DeleteHabitUseCase(habitRepository));
+  GetIt.I.registerLazySingleton<ToggleTodayHabitUseCase>(() => ToggleTodayHabitUseCase(habitRepository));
+
+  // Register use cases for Users
+  GetIt.I.registerLazySingleton<GetUsersUseCase>(() => GetUsersUseCase(userRepository));
+  GetIt.I.registerLazySingleton<GetUserByIdUseCase>(() => GetUserByIdUseCase(userRepository));
+  GetIt.I.registerLazySingleton<GetUserByEmailUseCase>(() => GetUserByEmailUseCase(userRepository));
+  GetIt.I.registerLazySingleton<AddUserUseCase>(() => AddUserUseCase(userRepository));
+  GetIt.I.registerLazySingleton<UpdateUserUseCase>(() => UpdateUserUseCase(userRepository));
+  GetIt.I.registerLazySingleton<DeleteUserUseCase>(() => DeleteUserUseCase(userRepository));
+
+  // Register use cases for Reflections
+  GetIt.I.registerLazySingleton<GetReflectionsUseCase>(() => GetReflectionsUseCase(reflectionRepository));
+  GetIt.I.registerLazySingleton<GetReflectionByIdUseCase>(() => GetReflectionByIdUseCase(reflectionRepository));
+  GetIt.I.registerLazySingleton<AddReflectionUseCase>(() => AddReflectionUseCase(reflectionRepository));
+  GetIt.I.registerLazySingleton<UpdateReflectionUseCase>(() => UpdateReflectionUseCase(reflectionRepository));
+  GetIt.I.registerLazySingleton<DeleteReflectionUseCase>(() => DeleteReflectionUseCase(reflectionRepository));
+  GetIt.I.registerLazySingleton<GetQuestionsUseCase>(() => GetQuestionsUseCase(reflectionRepository));
+
+  // Register use cases for Settings
+  GetIt.I.registerLazySingleton<GetSettingsUseCase>(() => GetSettingsUseCase(settingsRepository));
+  GetIt.I.registerLazySingleton<SaveSettingsUseCase>(() => SaveSettingsUseCase(settingsRepository));
+  GetIt.I.registerLazySingleton<UpdateThemeUseCase>(() => UpdateThemeUseCase(settingsRepository));
+  GetIt.I.registerLazySingleton<UpdateLanguageUseCase>(() => UpdateLanguageUseCase(settingsRepository));
+
+  // Register use cases for Motivations
+  GetIt.I.registerLazySingleton<GetQuotesUseCase>(() => GetQuotesUseCase(motivationRepository));
+  GetIt.I.registerLazySingleton<GetFactsUseCase>(() => GetFactsUseCase(motivationRepository));
+  GetIt.I.registerLazySingleton<GetQuotesByCategoryUseCase>(() => GetQuotesByCategoryUseCase(motivationRepository));
+  GetIt.I.registerLazySingleton<GetFactsByCategoryUseCase>(() => GetFactsByCategoryUseCase(motivationRepository));
+  GetIt.I.registerLazySingleton<GetMotivationCategoriesUseCase>(() => GetMotivationCategoriesUseCase(motivationRepository));
+
+  // Register UI stores
+  final settingsStore = SettingsStore();
+  final motivationStore = MotivationStore();
+  
+  GetIt.I.registerSingleton<SettingsStore>(settingsStore);
+  GetIt.I.registerSingleton<MotivationStore>(motivationStore);
+  
+  // Initialize stores
+  motivationStore.initialize();
 
   runApp(MyApp());
 }
