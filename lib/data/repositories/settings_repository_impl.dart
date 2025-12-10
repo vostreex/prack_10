@@ -27,7 +27,17 @@ class SettingsRepositoryImpl implements SettingsRepository {
     if (languageCode != 'ru' && languageCode != 'en') {
       throw Exception('Неподдерживаемый язык');
     }
-    _dataSource.updateLanguage(languageCode);
+    await _dataSource.updateLanguage(languageCode);
+  }
+
+  @override
+  Future<void> setOnboardingCompleted(bool completed) async {
+    await _dataSource.setOnboardingCompleted(completed);
+  }
+
+  @override
+  Future<bool> getOnboardingCompleted() async {
+    return await _dataSource.getOnboardingCompleted();
   }
 }
 

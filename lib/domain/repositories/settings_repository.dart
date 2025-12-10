@@ -5,5 +5,7 @@ abstract class SettingsRepository {
   Future<void> saveSettings(AppSettings settings);
   Future<void> updateTheme(bool isDarkMode);
   Future<void> updateLanguage(String languageCode);
+  Future<void> setOnboardingCompleted(bool completed);
+  Future<bool> getOnboardingCompleted();
 }
 

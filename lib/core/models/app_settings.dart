@@ -1,19 +1,23 @@
 class AppSettings {
   final bool isDarkMode;
   final String languageCode; // Храним код языка вместо Locale
+  final bool onboardingCompleted;
 
   const AppSettings({
     required this.isDarkMode,
     required this.languageCode,
+    this.onboardingCompleted = false,
   });
 
   AppSettings copyWith({
     bool? isDarkMode,
     String? languageCode,
+    bool? onboardingCompleted,
   }) {
     return AppSettings(
       isDarkMode: isDarkMode ?? this.isDarkMode,
       languageCode: languageCode ?? this.languageCode,
+      onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
     );
   }
 
@@ -21,6 +25,7 @@ class AppSettings {
     return {
       'isDarkMode': isDarkMode,
       'languageCode': languageCode,
+      'onboardingCompleted': onboardingCompleted,
     };
   }
 
@@ -28,6 +33,7 @@ class AppSettings {
     return AppSettings(
       isDarkMode: json['isDarkMode'] ?? false,
       languageCode: json['languageCode'] ?? 'ru',
+      onboardingCompleted: json['onboardingCompleted'] ?? false,
     );
   }
 }

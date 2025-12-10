@@ -27,18 +27,12 @@ abstract class _SettingsStore with Store {
   @computed
   Locale get locale => Locale(languageCode);
 
-  SettingsStore() {
-    _loadSettings();
-  }
+  _SettingsStore();
 
-  Future<void> _loadSettings() async {
-    try {
-      final settings = await _getSettingsUseCase();
-      isDarkMode = settings.isDarkMode;
-      languageCode = settings.languageCode;
-    } catch (e) {
-      // Используем значения по умолчанию
-    }
+  Future<void> init() async {
+    final settings = await _getSettingsUseCase();
+    isDarkMode = settings.isDarkMode;
+    languageCode = settings.languageCode;
   }
 
   @action
