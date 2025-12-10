@@ -6,4 +6,5 @@ export 'habit.dart';
 export 'user.dart';
 export 'reflection_entry.dart';
 export 'onboarding_page.dart';
+export 'motivation_item.dart';
 

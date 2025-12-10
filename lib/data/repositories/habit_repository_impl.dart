@@ -9,34 +9,27 @@ class HabitRepositoryImpl implements HabitRepository {
 
   @override
   Future<List<Habit>> getAllHabits() async {
-    return _dataSource.habits.toList();
+    return await _dataSource.getAllHabits();
   }
 
   @override
   Future<Habit?> getHabitById(String id) async {
-    try {
-      return _dataSource.habits.firstWhere((habit) => habit.id == id);
-    } catch (e) {
-      return null;
-    }
+    return await _dataSource.getHabitById(id);
   }
 
   @override
   Future<void> addHabit(Habit habit) async {
-    _dataSource.habits.add(habit);
+    await _dataSource.addHabit(habit);
   }
 
   @override
   Future<void> updateHabit(Habit habit) async {
-    final index = _dataSource.habits.indexWhere((h) => h.id == habit.id);
-    if (index != -1) {
-      _dataSource.habits[index] = habit;
-    }
+    await _dataSource.updateHabit(habit);
   }
 
   @override
   Future<void> deleteHabit(String id) async {
-    _dataSource.habits.removeWhere((habit) => habit.id == id);
+    await _dataSource.deleteHabit(id);
   }
 
   @override
@@ -48,4 +41,3 @@ class HabitRepositoryImpl implements HabitRepository {
     }
   }
 }
-

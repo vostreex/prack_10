@@ -9,34 +9,27 @@ class ReflectionRepositoryImpl implements ReflectionRepository {
 
   @override
   Future<List<ReflectionEntry>> getAllReflections() async {
-    return _dataSource.reflections.toList();
+    return await _dataSource.getAllReflections();
   }
 
   @override
   Future<ReflectionEntry?> getReflectionById(String id) async {
-    try {
-      return _dataSource.reflections.firstWhere((reflection) => reflection.id == id);
-    } catch (e) {
-      return null;
-    }
+    return await _dataSource.getReflectionById(id);
   }
 
   @override
   Future<void> addReflection(ReflectionEntry reflection) async {
-    _dataSource.reflections.add(reflection);
+    await _dataSource.addReflection(reflection);
   }
 
   @override
   Future<void> updateReflection(ReflectionEntry reflection) async {
-    final index = _dataSource.reflections.indexWhere((r) => r.id == reflection.id);
-    if (index != -1) {
-      _dataSource.reflections[index] = reflection;
-    }
+    await _dataSource.updateReflection(reflection);
   }
 
   @override
   Future<void> deleteReflection(String id) async {
-    _dataSource.reflections.removeWhere((reflection) => reflection.id == id);
+    await _dataSource.deleteReflection(id);
   }
 
   @override
@@ -44,4 +37,3 @@ class ReflectionRepositoryImpl implements ReflectionRepository {
     return _dataSource.getQuestions();
   }
 }
-

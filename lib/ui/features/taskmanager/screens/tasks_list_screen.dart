@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/models/task.dart';
 import '../state/tasks_list_store.dart';
 import '../widgets/task_tile.dart';
 import '../widgets/task_category_dropdown.dart';
@@ -131,7 +130,7 @@ class TasksListScreen extends StatelessWidget {
                         task: task,
                         onDelete: () => _confirmDelete(task.id),
                         onTap: () async {
-                          final result = await context.push('/tasks/${task.id}');
+                          final result = await context.push('/tasks/${task.id}', extra: task);
                           if (result != null && result is Map<String, dynamic>) {
                             if (result['delete'] == true) {
                               _store.deleteTask(task.id);

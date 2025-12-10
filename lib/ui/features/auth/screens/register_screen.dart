@@ -117,13 +117,14 @@ class RegisterScreen extends StatelessWidget {
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Регистрация успешна! Теперь вы можете войти'),
+                        content: Text('Регистрация успешна!'),
                         backgroundColor: Colors.green,
-                        duration: Duration(seconds: 3),
+                        duration: Duration(seconds: 2),
                       ),
                     );
 
-                    context.go('/login');
+                    // После успешной регистрации и автоматического входа перенаправляем на главную
+                    context.go('/');
                   }
                       : null, // null = кнопка отключена
                   style: ElevatedButton.styleFrom(

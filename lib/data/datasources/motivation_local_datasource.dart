@@ -1,186 +1,231 @@
+import 'package:sqflite/sqflite.dart';
+import 'package:prack_10/core/models/motivation_item.dart';
+import 'package:prack_10/data/dtos/motivation_dto.dart';
+import 'package:prack_10/data/mappers/motivation_mapper.dart';
+import 'app_database.dart';
+
+/// Data source для хранения мотиваций в SQLite
 class MotivationLocalDataSource {
-  static final Map<String, List<String>> _categorizedQuotes = {
-    'Работа': [
-      'Position yourself to succeed by doing the other things in your life that rejuvenate you. Exhaustion affects your quality and productivity. – Jeff VanderMeer',
-      'A great leader takes people where they don\'t necessarily want to go, but ought to be. – Rosalynn Carter',
-      'Lack of direction, not lack of time, is the problem. We all have twenty-four hour days. – Zig Ziglar',
-      'Schedule your priorities. – Stephen Covey',
-      'What are we busy about? – Henry David Thoreau',
-      'When something is important enough, you do it even if the odds are not in your favor. – Elon Musk',
-      'The key to unlocking better results is an abundant approach. – Doug Conant',
-      'Average leaders raise the bar on themselves; good leaders raise the bar for others; great leaders inspire others to raise their own bar. – Orrin Woodward',
-      'Productivity is never an accident. It is always the result of a commitment to excellence, intelligent planning, and focused effort. – Paul J. Meyer',
-      'Efficiency is doing things right; effectiveness is doing the right things. – Peter Drucker',
-      'The key is not to prioritize what\'s on your schedule, but to schedule your priorities. – Stephen Covey',
-      'A dream doesn\'t become reality through magic; it takes sweat, determination and hard work. – Colin Powell',
-      'No great achiever – even those who made it seem easy – ever succeeded without hard work. – Jonathan Sacks',
-      'Nothing is less productive than to make more efficient what should not be done at all. – Peter Drucker',
-      'Focus on being productive instead of busy. – Tim Ferriss',
-      'Successful people are not gifted; they just work hard, then succeed on purpose. – G.K. Nielson',
-      'Success isn\'t always about greatness. It\'s about consistency. Consistent hard work leads to success. Greatness will come. – Dwayne Johnson',
-      'The only thing standing between you and outrageous success is continuous progress. – Dan Waldschmidt',
-      'Coming together is a beginning, staying together is progress, and working together is a success. – Henry Ford',
-      'Don\'t limit yourself. Many people limit themselves to what they think they can do. You can go as far as your mind lets you. What you believe, remember, you can achieve. – Mary Kay Ash',
-      'No work is insignificant. All labor that uplifts humanity has dignity. – Martin Luther King Jr.',
-    ],
-    'Личное': [
-      'Start by doing what\'s necessary; then do what\'s possible; and suddenly you are doing the impossible. – Francis Of Assisi',
-      'Great things are done by a series of small things brought together. – Vincent Van Gogh',
-      'The way to get started is to quit talking and begin doing. – Walt Disney',
-      'Productivity is being able to do things that you were never able to do before. – Franz Kafka',
-      'The tragedy in life doesn\'t lie in not reaching your goal. The tragedy lies in having no goal to reach. – Benjamin Mays',
-      'If you spend too much time thinking about a thing, you\'ll never get it done. – Bruce Lee',
-      'Success is the sum of small efforts, repeated day in and day out. – Robert Collier',
-      'There are no secrets to success. It is the result of preparation, hard work, and learning from failure. – Colin Powell',
-      'Hard work beats talent when talent doesn\'t work hard. – Tim Notke',
-      'Your mind is for having ideas, not holding them. – David Allen',
-      'Amateurs sit and wait for inspiration, the rest of us just get up and go to work. – Stephen King',
-      'You dont have to see the whole staircase, just take the first step. – Martin Luther King Jr.',
-      'Change brings opportunity. – Nido Qubein',
-      'Sometimes good things fall apart so better things could fall together. – Marilyn Monroe',
-      'Incredible change happens in your life when you decide to take control of what you have power over instead of craving control over what you don\'t. – Steve Maraboli',
-      'Be the change you want to see in this world. – Gandhi',
-      'The only person you are destined to become is the person you decide to be. – Ralph Waldo Emerson',
-      'No matter who you are, no matter what you did, no matter where youve come from, you can always change, become a better version of yourself. – Madonna',
-      'The key to immortality is first living a life worth remembering. – Bruce Lee',
-      'The main thing is to keep the main thing the main thing. – Steven Covey',
-      'Success often comes to those who dare to act. It seldom goes to the timid who are ever afraid of the consequences. – Jawaharlal Nehru',
-      'The only limits you have are the limits you believe. – Wayne Dyer',
-      'Nothing in life is to be feared, it is only to be understood. Now is the time to understand more, so that we may fear less. – Marie Curie',
-      'Do what you can with all you have, wherever you are. – Theodore Roosevelt',
-    ],
-    'Учёба': [
-      'Hard work beats talent when talent doesn\'t work hard. – Tim Notke',
-      'Amateurs sit and wait for inspiration, the rest of us just get up and go to work. – Stephen King',
-      'You dont have to see the whole staircase, just take the first step. – Martin Luther King Jr.',
-      'Success is the sum of small efforts, repeated day in and day out. – Robert Collier',
-      'There are no secrets to success. It is the result of preparation, hard work, and learning from failure. – Colin Powell',
-      'When you talk, you are only repeating what you already know. But if you listen, you may learn something new. – Dalai Lama',
-      'The more that you read, the more things you will know, the more that you learn, the more places you\'ll go. – Dr. Seuss',
-      'There is no end to education. It is not that you read a book, pass an examination, and finish with education. The whole of life, from the moment you are born to the moment you die, is a process of learning. – Jiddu Krishnamurti',
-      'Learning is a lifelong process. – Unknown',
-      'I am always ready to learn although I do not always like being taught. – Winston Churchill',
-      'Learning is the only thing the mind never exhausts. – Leonardo da Vinci',
-      'Success isnt overnight. Its when every day you get a little better. – Unknown',
-      'There is no substitute for hard work. – Thomas Edison',
-      'A little progress each day adds up to big results. – Satya Nani',
-      'Just believe in yourself. Even if you don\'t, pretend that you do and, at some point, you will. – Venus Williams',
-      'Take it all one day at a time. – Unknown',
-      'It always seems impossible until it\'s done. – Nelson Mandela',
-      'Life is an open book test. Learning how to learn is your most valuable skill in the online world. – Marc Cuban',
-      'Learning is not compulsory. Neither is survival. – W. Edwards Deming',
-    ],
-    'Без категории': [
-      'The way to get started is to quit talking and begin doing. – Walt Disney',
-      'Productivity is being able to do things that you were never able to do before. – Franz Kafka',
-      'If you spend too much time thinking about a thing, you\'ll never get it done. – Bruce Lee',
-      'Self-doubt kills talent. – Edie McClurg',
-      'Believe you can and youre halfway there. – Theodore Roosevelt',
-      'You get what you give. – Jennifer Lopez',
-      'When we strive to become better than we are, everything around us becomes better too. – Paulo Coelho',
-      'Success is not final; failure is not fatal: It is the courage to continue that counts. – Winston Churchill',
-      'It is better to fail in originality than to succeed in imitation. – Herman Melville',
-      'Doubt kills more dreams than failure ever will. – Suzy Kassem',
-      'Fear is the biggest disability of all. – Nick Vujicic',
-      'Everything is theoretically impossible, until it is done. – Robert A. Heinlein',
-      'Before anything else, preparation is the key to success. – Alexander Graham Bell',
-    ],
-  };
+  static const String _tableName = 'motivations';
+  static bool _initialized = false;
 
-  static final Map<String, List<String>> _categorizedFacts = {
-    'Работа': [
-      'Productivity up 2.4 percent in second quarter 2025. – U.S. Bureau of Labor Statistics',
-      'U.S. productivity improved by 1.7 percent in 2019, which marked the largest gains in nine years.',
-      'Actively disengaged employees cost the U.S. 483 to 605 billion dollars annually in lost productivity.',
-      'Higher engagement rates result in 17% higher employee productivity, as well as better business outcomes like improved profitability and better quality products.',
-      'The nonfarm business sector reported increased employee productivity of 10.1%, decreased production of 37.1%, and 42.9% fewer hours worked.',
-      'Teams with strong engagement achieve up to 21% higher profitability, showing how job satisfaction and engagement drive significant productivity gains.',
-      'The average employee is productive for just 2 hours and 53 minutes each day.',
-      'Employee distractions cost businesses 588 billion dollars each year.',
-      'Nonfarm productivity landed at 7.5% in the first quarter of 2022, the lowest since the third quarter of 1947.',
-      'Almost half of medium-sized businesses saw a 10% increase in productivity after using workforce management tools.',
-      '84% of us procrastinate.',
-      'Early morning is the most productive time of day for 44% of employees.',
-      'A further 31% said "late mornings" are their most productive time.',
-      'Multitasking can result in a 40% decrease in productivity, greater anxiety, and a 10 points reduction in IQ.',
-      'Employees lose up to 25% of the work week to distractions.',
-      'Flexible scheduling makes employees feel 43% more productive.',
-      'Open office layouts reduce productivity by 15%.',
-      'The typical employee is only productive for 60% of the day across all professions. But for office workers, that proportion dramatically declines to 31%.',
-    ],
-    'Личное': [
-      'Mondays and Tuesdays are the most productive weekdays.',
-      'We naturally concentrate best in 90-minute intervals, followed by a short break.',
-      'On average, employees are productive for just 2 hours and 53 minutes each day.',
-      'Multitasking can cost employees up to 6 hours of productivity per day.',
-      'Sleep is extremely important to productivity; lack of sleep reduces efficiency.',
-      'Happy workers are 13% more productive.',
-      'Multitasking can reduce productivity by up to 40%.',
-      'Writing down your goals increases your chances of achieving them by 42%.',
-      'Gratitude journaling can increase happiness and productivity.',
-      '90% of people say better time management will increase their productivity.',
-      'Focus on tasks (86%)',
-      'Ability to reach their goals (84%)',
-      'Decision-making (82%)',
-      'The Pomodoro technique is named after a tomato.',
-      'Color psychology can affect mood and productivity.',
-      'Plants boost productivity.',
-      'Background noise balance affects focus.',
-      '4-day workweeks can increase productivity.',
-      'Women tend to have better work-life balance than men.',
-      'Poor work-life balance costs the global economy 8.8 dollars trillion annually.',
-    ],
-    'Учёба': [
-      'Productivity peaks around 11 a.m., declines after lunch, and tanks after 3 p.m.',
-      'Most employees are productive for about three hours most days.',
-      '90% of employees get distracted at least once daily, and almost 1 in 4 are interrupted more than 6 times per workday.',
-      'In 2023, US workers spent about 7 hours and 24 minutes each day looking at their screens.',
-      'Employees in the US finish their tasks 2 hours earlier than expected on average.',
-      '75% of students procrastinate.',
-      'Effective employee time tracking can reduce productivity leaks by 80% and boost revenue by 61%.',
-      'Effective time management improves academic performance, with a 53% higher chance of higher grades for students.',
-      'Adopting time management strategies can reduce stress by 23%.',
-    ],
-    'Без категории': [
-      'The average unproductive time for remote workers is 27 minutes per day.',
-      'Sleep is extremely important to productivity; lack of sleep reduces efficiency.',
-      'Happy workers are 13% more productive.',
-      'Over one-third of workers reveal they can only stay productive for less than 30 hours each week.',
-      'Productivity is 2.1% above pre-pandemic levels.',
-      '66% of companies see productivity improvements with remote work.',
-      'An individual productivity hinges on mental energy and a sense of internal and external motivation.',
-      '90% of employees in the U.S. get distracted at least once daily, and almost 1 in 4 are interrupted more than 6 times per workday.',
-    ],
-  };
+  /// Инициализация БД с тестовыми данными
+  Future<void> initialize() async {
+    if (_initialized) return;
 
-  Map<String, List<String>> getQuotes() {
-    return _categorizedQuotes;
-  }
+    final db = await AppDatabase.instance();
+    
+    // Проверяем, есть ли уже данные
+    final count = Sqflite.firstIntValue(
+      await db.rawQuery('SELECT COUNT(*) FROM $_tableName'),
+    ) ?? 0;
 
-  Map<String, List<String>> getFacts() {
-    return _categorizedFacts;
-  }
-
-  List<String> getQuotesByCategory(String category) {
-    if (category == 'Все категории') {
-      return _categorizedQuotes.values.expand((e) => e).toList();
+    if (count == 0) {
+      await _insertTestData(db);
     }
-    return _categorizedQuotes[category] ??
-        _categorizedQuotes['Без категории'] ??
-        [];
+
+    _initialized = true;
   }
 
-  List<String> getFactsByCategory(String category) {
-    if (category == 'Все категории') {
-      return _categorizedFacts.values.expand((e) => e).toList();
+  /// Вставка тестовых данных
+  Future<void> _insertTestData(Database db) async {
+    final batch = db.batch();
+
+    // Тестовые цитаты
+    final testQuotes = [
+      {'category': 'Работа', 'text': 'Position yourself to succeed by doing the other things in your life that rejuvenate you. Exhaustion affects your quality and productivity. – Jeff VanderMeer'},
+      {'category': 'Работа', 'text': 'A great leader takes people where they don\'t necessarily want to go, but ought to be. – Rosalynn Carter'},
+      {'category': 'Работа', 'text': 'Lack of direction, not lack of time, is the problem. We all have twenty-four hour days. – Zig Ziglar'},
+      {'category': 'Работа', 'text': 'Schedule your priorities. – Stephen Covey'},
+      {'category': 'Работа', 'text': 'When something is important enough, you do it even if the odds are not in your favor. – Elon Musk'},
+      {'category': 'Личное', 'text': 'Start by doing what\'s necessary; then do what\'s possible; and suddenly you are doing the impossible. – Francis Of Assisi'},
+      {'category': 'Личное', 'text': 'Great things are done by a series of small things brought together. – Vincent Van Gogh'},
+      {'category': 'Личное', 'text': 'The way to get started is to quit talking and begin doing. – Walt Disney'},
+      {'category': 'Личное', 'text': 'Success is the sum of small efforts, repeated day in and day out. – Robert Collier'},
+      {'category': 'Личное', 'text': 'Be the change you want to see in this world. – Gandhi'},
+      {'category': 'Учёба', 'text': 'Hard work beats talent when talent doesn\'t work hard. – Tim Notke'},
+      {'category': 'Учёба', 'text': 'The more that you read, the more things you will know, the more that you learn, the more places you\'ll go. – Dr. Seuss'},
+      {'category': 'Учёба', 'text': 'Learning is a lifelong process. – Unknown'},
+      {'category': 'Учёба', 'text': 'It always seems impossible until it\'s done. – Nelson Mandela'},
+      {'category': 'Учёба', 'text': 'There is no substitute for hard work. – Thomas Edison'},
+      {'category': 'Без категории', 'text': 'Believe you can and youre halfway there. – Theodore Roosevelt'},
+      {'category': 'Без категории', 'text': 'Success is not final; failure is not fatal: It is the courage to continue that counts. – Winston Churchill'},
+      {'category': 'Без категории', 'text': 'Before anything else, preparation is the key to success. – Alexander Graham Bell'},
+    ];
+
+    // Тестовые факты
+    final testFacts = [
+      {'category': 'Работа', 'text': 'Productivity up 2.4 percent in second quarter 2025. – U.S. Bureau of Labor Statistics'},
+      {'category': 'Работа', 'text': 'The average employee is productive for just 2 hours and 53 minutes each day.'},
+      {'category': 'Работа', 'text': 'Multitasking can result in a 40% decrease in productivity, greater anxiety, and a 10 points reduction in IQ.'},
+      {'category': 'Работа', 'text': 'Flexible scheduling makes employees feel 43% more productive.'},
+      {'category': 'Личное', 'text': 'Mondays and Tuesdays are the most productive weekdays.'},
+      {'category': 'Личное', 'text': 'We naturally concentrate best in 90-minute intervals, followed by a short break.'},
+      {'category': 'Личное', 'text': 'Writing down your goals increases your chances of achieving them by 42%.'},
+      {'category': 'Личное', 'text': 'Happy workers are 13% more productive.'},
+      {'category': 'Учёба', 'text': 'Productivity peaks around 11 a.m., declines after lunch, and tanks after 3 p.m.'},
+      {'category': 'Учёба', 'text': '75% of students procrastinate.'},
+      {'category': 'Учёба', 'text': 'Effective time management improves academic performance, with a 53% higher chance of higher grades for students.'},
+      {'category': 'Без категории', 'text': 'Sleep is extremely important to productivity; lack of sleep reduces efficiency.'},
+      {'category': 'Без категории', 'text': 'Productivity is 2.1% above pre-pandemic levels.'},
+    ];
+
+    // Вставляем цитаты
+    for (final quote in testQuotes) {
+      final item = MotivationItem(
+        text: quote['text']!,
+        category: quote['category']!,
+        type: 'quote',
+      );
+      final dto = MotivationMapper.toDto(item);
+      batch.insert(_tableName, dto.toMap());
     }
-    return _categorizedFacts[category] ??
-        _categorizedFacts['Без категории'] ??
-        [];
+
+    // Вставляем факты
+    for (final fact in testFacts) {
+      final item = MotivationItem(
+        text: fact['text']!,
+        category: fact['category']!,
+        type: 'fact',
+      );
+      final dto = MotivationMapper.toDto(item);
+      batch.insert(_tableName, dto.toMap());
+    }
+
+    await batch.commit(noResult: true);
   }
 
-  List<String> getCategories() {
-    return _categorizedQuotes.keys.toList();
+  /// Получить все цитаты, сгруппированные по категориям
+  Future<Map<String, List<String>>> getQuotes() async {
+    await initialize();
+    final db = await AppDatabase.instance();
+    final List<Map<String, dynamic>> maps = await db.query(
+      _tableName,
+      where: 'type = ?',
+      whereArgs: ['quote'],
+    );
+
+    final Map<String, List<String>> result = {};
+    for (final map in maps) {
+      final dto = MotivationDto.fromMap(map);
+      final category = dto.category;
+      if (!result.containsKey(category)) {
+        result[category] = [];
+      }
+      result[category]!.add(dto.text);
+    }
+
+    return result;
+  }
+
+  /// Получить все факты, сгруппированные по категориям
+  Future<Map<String, List<String>>> getFacts() async {
+    await initialize();
+    final db = await AppDatabase.instance();
+    final List<Map<String, dynamic>> maps = await db.query(
+      _tableName,
+      where: 'type = ?',
+      whereArgs: ['fact'],
+    );
+
+    final Map<String, List<String>> result = {};
+    for (final map in maps) {
+      final dto = MotivationDto.fromMap(map);
+      final category = dto.category;
+      if (!result.containsKey(category)) {
+        result[category] = [];
+      }
+      result[category]!.add(dto.text);
+    }
+
+    return result;
+  }
+
+  /// Получить цитаты по категории
+  Future<List<String>> getQuotesByCategory(String category) async {
+    await initialize();
+    final db = await AppDatabase.instance();
+    
+    if (category == 'Все категории') {
+      final List<Map<String, dynamic>> maps = await db.query(
+        _tableName,
+        where: 'type = ?',
+        whereArgs: ['quote'],
+      );
+      return maps.map((map) => MotivationDto.fromMap(map).text).toList();
+    }
+
+    final List<Map<String, dynamic>> maps = await db.query(
+      _tableName,
+      where: 'type = ? AND category = ?',
+      whereArgs: ['quote', category],
+    );
+
+    if (maps.isEmpty && category != 'Без категории') {
+      // Если категория не найдена, возвращаем из "Без категории"
+      return getQuotesByCategory('Без категории');
+    }
+
+    return maps.map((map) => MotivationDto.fromMap(map).text).toList();
+  }
+
+  /// Получить факты по категории
+  Future<List<String>> getFactsByCategory(String category) async {
+    await initialize();
+    final db = await AppDatabase.instance();
+    
+    if (category == 'Все категории') {
+      final List<Map<String, dynamic>> maps = await db.query(
+        _tableName,
+        where: 'type = ?',
+        whereArgs: ['fact'],
+      );
+      return maps.map((map) => MotivationDto.fromMap(map).text).toList();
+    }
+
+    final List<Map<String, dynamic>> maps = await db.query(
+      _tableName,
+      where: 'type = ? AND category = ?',
+      whereArgs: ['fact', category],
+    );
+
+    if (maps.isEmpty && category != 'Без категории') {
+      // Если категория не найдена, возвращаем из "Без категории"
+      return getFactsByCategory('Без категории');
+    }
+
+    return maps.map((map) => MotivationDto.fromMap(map).text).toList();
+  }
+
+  /// Получить список всех категорий
+  Future<List<String>> getCategories() async {
+    await initialize();
+    final db = await AppDatabase.instance();
+    final List<Map<String, dynamic>> maps = await db.query(
+      _tableName,
+      columns: ['category'],
+      distinct: true,
+    );
+
+    final categories = maps.map((map) => map['category'] as String).toSet().toList();
+    return ['Все категории', ...categories];
+  }
+
+  /// Добавить новый элемент мотивации
+  Future<void> addMotivationItem(MotivationItem item) async {
+    await initialize();
+    final db = await AppDatabase.instance();
+    final dto = MotivationMapper.toDto(item);
+    await db.insert(_tableName, dto.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  /// Удалить элемент мотивации
+  Future<void> deleteMotivationItem(String id) async {
+    final db = await AppDatabase.instance();
+    await db.delete(
+      _tableName,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 }
-

@@ -1,7 +1,6 @@
 // screens/habit_details_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 import 'package:prack_10/core/models/habit.dart';
 import 'package:prack_10/core/models/habit_extensions.dart';

@@ -85,24 +85,24 @@ mixin _$EditNoteStore on _EditNoteStore, Store {
   }
 
   @override
-  void setTitle(String title) {
+  void setTitle(String value) {
     final _$actionInfo = _$_EditNoteStoreActionController.startAction(
       name: '_EditNoteStore.setTitle',
     );
     try {
-      return super.setTitle(title);
+      return super.setTitle(value);
     } finally {
       _$_EditNoteStoreActionController.endAction(_$actionInfo);
     }
   }
 
   @override
-  void setBody(String body) {
+  void setBody(String value) {
     final _$actionInfo = _$_EditNoteStoreActionController.startAction(
       name: '_EditNoteStore.setBody',
     );
     try {
-      return super.setBody(body);
+      return super.setBody(value);
     } finally {
       _$_EditNoteStoreActionController.endAction(_$actionInfo);
     }

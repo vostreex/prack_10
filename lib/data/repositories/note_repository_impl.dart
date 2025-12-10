@@ -9,51 +9,42 @@ class NoteRepositoryImpl implements NoteRepository {
 
   @override
   Future<List<Note>> getAllNotes() async {
-    return _dataSource.notes.toList();
+    return await _dataSource.getAllNotes();
   }
 
   @override
   Future<Note?> getNoteById(String id) async {
-    try {
-      return _dataSource.notes.firstWhere((note) => note.id == id);
-    } catch (e) {
-      return null;
-    }
+    return await _dataSource.getNoteById(id);
   }
 
   @override
   Future<void> addNote(Note note) async {
-    _dataSource.notes.add(note);
+    await _dataSource.addNote(note);
   }
 
   @override
   Future<void> updateNote(Note note) async {
-    final index = _dataSource.notes.indexWhere((n) => n.id == note.id);
-    if (index != -1) {
-      _dataSource.notes[index] = note;
-    }
+    await _dataSource.updateNote(note);
   }
 
   @override
   Future<void> deleteNote(String id) async {
-    _dataSource.notes.removeWhere((note) => note.id == id);
+    await _dataSource.deleteNote(id);
   }
 
   @override
   Future<void> toggleFavorite(String id) async {
-    final index = _dataSource.notes.indexWhere((note) => note.id == id);
-    if (index != -1) {
-      final note = _dataSource.notes[index];
-      _dataSource.notes[index] = note.copyWith(isFavorite: !note.isFavorite);
+    final note = await getNoteById(id);
+    if (note != null) {
+      await updateNote(note.copyWith(isFavorite: !note.isFavorite));
     }
   }
 
   @override
   Future<void> toggleArchive(String id) async {
-    final index = _dataSource.notes.indexWhere((note) => note.id == id);
-    if (index != -1) {
-      final note = _dataSource.notes[index];
-      _dataSource.notes[index] = note.copyWith(isArchived: !note.isArchived);
+    final note = await getNoteById(id);
+    if (note != null) {
+      await updateNote(note.copyWith(isArchived: !note.isArchived));
     }
   }
 
@@ -62,4 +53,3 @@ class NoteRepositoryImpl implements NoteRepository {
     return _dataSource.getCategories();
   }
 }
-

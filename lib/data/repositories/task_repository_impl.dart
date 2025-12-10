@@ -9,34 +9,26 @@ class TaskRepositoryImpl implements TaskRepository {
 
   @override
   Future<List<Task>> getAllTasks() async {
-    return _dataSource.tasks.toList();
+    return await _dataSource.getAllTasks();
   }
 
   @override
   Future<Task?> getTaskById(String id) async {
-    try {
-      return _dataSource.tasks.firstWhere((task) => task.id == id);
-    } catch (e) {
-      return null;
-    }
+    return await _dataSource.getTaskById(id);
   }
 
   @override
   Future<void> addTask(Task task) async {
-    _dataSource.tasks.add(task);
+    await _dataSource.addTask(task);
   }
 
   @override
   Future<void> updateTask(Task task) async {
-    final index = _dataSource.tasks.indexWhere((t) => t.id == task.id);
-    if (index != -1) {
-      _dataSource.tasks[index] = task;
-    }
+    await _dataSource.updateTask(task);
   }
 
   @override
   Future<void> deleteTask(String id) async {
-    _dataSource.tasks.removeWhere((task) => task.id == id);
+    await _dataSource.deleteTask(id);
   }
 }
-

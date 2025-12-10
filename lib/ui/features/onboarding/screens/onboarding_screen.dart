@@ -2,8 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:go_router/go_router.dart';
+import 'package:get_it/get_it.dart';
 import 'package:prack_10/ui/features/onboarding/state/onboarding_store.dart';
 import 'package:prack_10/core/models/onboarding_page_extensions.dart';
+import 'package:prack_10/domain/repositories/settings_repository.dart';
 
 class OnboardingScreen extends StatelessWidget {
   OnboardingScreen({super.key});
@@ -11,8 +13,12 @@ class OnboardingScreen extends StatelessWidget {
   final OnboardingStore store = OnboardingStore();
   final PageController _pageController = PageController();
 
-  void _completeOnboarding(BuildContext context) {
-    context.go('/login');
+  Future<void> _completeOnboarding(BuildContext context) async {
+    final settingsRepository = GetIt.I<SettingsRepository>();
+    await settingsRepository.setOnboardingCompleted(true);
+    if (context.mounted) {
+      context.go('/login');
+    }
   }
 
   @override
@@ -137,9 +143,9 @@ class OnboardingScreen extends StatelessWidget {
 
                     // Кнопка "Далее" или "Начать!"
                     ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (store.isLastPage) {
-                          _completeOnboarding(context);
+                          await _completeOnboarding(context);
                         } else {
                           _pageController.nextPage(
                             duration: const Duration(milliseconds: 400),

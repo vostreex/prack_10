@@ -8,27 +8,26 @@ class MotivationRepositoryImpl implements MotivationRepository {
 
   @override
   Future<Map<String, List<String>>> getQuotes() async {
-    return _dataSource.getQuotes();
+    return await _dataSource.getQuotes();
   }
 
   @override
   Future<Map<String, List<String>>> getFacts() async {
-    return _dataSource.getFacts();
+    return await _dataSource.getFacts();
   }
 
   @override
   Future<List<String>> getQuotesByCategory(String category) async {
-    return _dataSource.getQuotesByCategory(category);
+    return await _dataSource.getQuotesByCategory(category);
   }
 
   @override
   Future<List<String>> getFactsByCategory(String category) async {
-    return _dataSource.getFactsByCategory(category);
+    return await _dataSource.getFactsByCategory(category);
   }
 
   @override
   Future<List<String>> getCategories() async {
-    return _dataSource.getCategories();
+    return await _dataSource.getCategories();
   }
 }
-
