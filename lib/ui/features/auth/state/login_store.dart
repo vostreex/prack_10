@@ -1,8 +1,7 @@
 // features/auth/presentation/state/login_store.dart
 import 'package:mobx/mobx.dart';
 import 'package:get_it/get_it.dart';
-import '../../../../core/models/user.dart';
-import 'package:prack_10/domain/usecases/users/get_users_usecase.dart';
+import 'package:prack_10/domain/repositories/user_repository.dart';
 
 part 'login_store.g.dart';
 
@@ -14,7 +13,7 @@ abstract class _LoginStore with Store {
   @observable bool isLoading = false;
   @observable String? errorMessage;
 
-  final GetUsersUseCase _getUsersUseCase = GetIt.I<GetUsersUseCase>();
+  final UserRepository _userRepository = GetIt.I<UserRepository>();
 
   @computed
   bool get canSubmit => email.contains('@') && password.length >= 6 && !isLoading;
@@ -33,11 +32,7 @@ abstract class _LoginStore with Store {
     errorMessage = null;
 
     try {
-      await Future.delayed(const Duration(milliseconds: 800));
-
-      final users = await _getUsersUseCase();
-      final success = users.any((u) =>
-      u.email.toLowerCase() == email.toLowerCase() && u.password == password);
+      final success = await _userRepository.login(email, password);
 
       if (!success) {
         errorMessage = 'Неверный email или пароль';

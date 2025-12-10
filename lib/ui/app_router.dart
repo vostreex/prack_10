@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:prack_10/ui/features/auth/screens/login_screen.dart';
@@ -12,7 +13,6 @@ import 'package:prack_10/ui/features/settings/screen/settings_screen.dart';
 import 'package:prack_10/ui/features/notes/screens/edit_note_screen.dart';
 import 'package:prack_10/core/models/note.dart';
 import 'package:prack_10/ui/features/main_screen.dart';
-import 'package:mobx/mobx.dart';
 import 'package:prack_10/ui/features/settings/screen/profile_screen.dart';
 import 'package:prack_10/core/models/habit.dart';
 import 'package:prack_10/ui/features/habits/screens/add_habit_screen.dart';
@@ -26,16 +26,18 @@ import 'package:prack_10/core/models/task.dart';
 import 'package:prack_10/ui/features/taskmanager/screens/add_task_screen.dart';
 import 'package:prack_10/ui/features/taskmanager/screens/task_details_screen.dart';
 import 'package:prack_10/ui/features/taskmanager/screens/tasks_list_screen.dart';
+import 'package:prack_10/domain/repositories/user_repository.dart';
+import 'package:prack_10/domain/repositories/settings_repository.dart';
 
 class AppRouter {
   late final GoRouter router = GoRouter(
-    initialLocation: '/onboarding',
+    initialLocation: '/',
+    redirect: _redirect,
     routes: [
       GoRoute(
         path: '/',
         builder: (context, state) => const MainMenuScreen(),
       ),
-
 
       GoRoute(
         path: '/notes',
@@ -62,7 +64,6 @@ class AppRouter {
         },
       ),
 
-
       GoRoute(
         path: '/tasks',
         builder: (context, state) => TasksListScreen(),
@@ -74,13 +75,13 @@ class AppRouter {
       GoRoute(
         path: '/tasks/:id',
         builder: (context, state) {
-          final id = state.pathParameters['id']!;
-          final tasks = GetIt.I<List<Task>>();
-          final task = tasks.firstWhere((t) => t.id == id);
+          final task = state.extra as Task?;
+          if (task == null) {
+            return TasksListScreen();
+          }
           return TaskDetailsScreen(task: task);
         },
       ),
-
 
       GoRoute(
         path: '/habits',
@@ -97,12 +98,10 @@ class AppRouter {
         ),
       ),
 
-
       GoRoute(
         path: '/motivation',
         builder: (context, state) => MotivationScreen(),
       ),
-
 
       GoRoute(
         path: '/login',
@@ -112,7 +111,6 @@ class AppRouter {
         path: '/register',
         builder: (context, state) => RegisterScreen(),
       ),
-
 
       GoRoute(
         path: '/reflections',
@@ -129,7 +127,6 @@ class AppRouter {
         ),
       ),
 
-
       GoRoute(
         path: '/onboarding',
         builder: (context, state) => OnboardingScreen(),
@@ -145,4 +142,39 @@ class AppRouter {
       ),
     ],
   );
+
+  /// Проверка авторизации и onboarding при навигации
+  Future<String?> _redirect(BuildContext context, GoRouterState state) async {
+    final userRepository = GetIt.I<UserRepository>();
+    final settingsRepository = GetIt.I<SettingsRepository>();
+    
+    final isLoggedIn = await userRepository.isLoggedIn();
+    final onboardingCompleted = await settingsRepository.getOnboardingCompleted();
+    
+    final isOnboardingRoute = state.matchedLocation == '/onboarding';
+    final isLoginRoute = state.matchedLocation == '/login' || state.matchedLocation == '/register';
+    final isPublicRoute = isOnboardingRoute || isLoginRoute;
+
+    // Если пользователь не прошел onboarding, перенаправляем на onboarding
+    if (!onboardingCompleted && !isOnboardingRoute) {
+      return '/onboarding';
+    }
+
+    // Если onboarding пройден, но пользователь не авторизован, перенаправляем на логин
+    if (onboardingCompleted && !isLoggedIn && !isPublicRoute) {
+      return '/login';
+    }
+
+    // Если пользователь авторизован и пытается зайти на логин/регистрацию, перенаправляем на главную
+    if (isLoggedIn && isLoginRoute) {
+      return '/';
+    }
+
+    // Если пользователь авторизован и прошел onboarding, разрешаем доступ
+    if (isLoggedIn && onboardingCompleted) {
+      return null;
+    }
+
+    return null;
+  }
 }

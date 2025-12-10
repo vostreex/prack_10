@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:prack_10/core/models/task.dart';
 import 'package:prack_10/ui/app.dart';
-import 'package:prack_10/core/models/user.dart';
-import 'package:prack_10/core/models/habit.dart';
-import 'package:prack_10/core/models/note.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:prack_10/core/models/reflection_entry.dart';
 import 'package:prack_10/ui/features/settings/state/settings_store.dart';
 import 'package:prack_10/ui/features/motivations/state/motivation_store.dart';
 import 'package:prack_10/data/datasources/note_local_datasource.dart';
@@ -42,19 +37,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('ru', null);
   await initializeDateFormatting('en', null);
-
-  // Register Lists first (before data sources to avoid circular dependency)
-  final notesList = <Note>[];
-  final tasksList = <Task>[];
-  final habitsList = <Habit>[];
-  final usersList = <User>[];
-  final reflectionsList = <ReflectionEntry>[];
-
-  GetIt.I.registerSingleton<List<Note>>(notesList);
-  GetIt.I.registerSingleton<List<Task>>(tasksList);
-  GetIt.I.registerSingleton<List<Habit>>(habitsList);
-  GetIt.I.registerSingleton<List<User>>(usersList);
-  GetIt.I.registerSingleton<List<ReflectionEntry>>(reflectionsList);
 
   // Register data sources
   GetIt.I.registerLazySingleton<NoteLocalDataSource>(() => NoteLocalDataSource());
@@ -136,14 +118,12 @@ void main() async {
   GetIt.I.registerLazySingleton<GetFactsByCategoryUseCase>(() => GetFactsByCategoryUseCase(motivationRepository));
   GetIt.I.registerLazySingleton<GetMotivationCategoriesUseCase>(() => GetMotivationCategoriesUseCase(motivationRepository));
 
-  // Register UI stores
   final settingsStore = SettingsStore();
-  final motivationStore = MotivationStore();
-  
+  await settingsStore.init();   // <-- ОЧЕНЬ ВАЖНО!!!
   GetIt.I.registerSingleton<SettingsStore>(settingsStore);
+
+  final motivationStore = MotivationStore();
   GetIt.I.registerSingleton<MotivationStore>(motivationStore);
-  
-  // Initialize stores
   motivationStore.initialize();
 
   runApp(MyApp());

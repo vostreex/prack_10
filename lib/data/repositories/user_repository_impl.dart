@@ -9,13 +9,14 @@ class UserRepositoryImpl implements UserRepository {
 
   @override
   Future<List<User>> getAllUsers() async {
-    return _dataSource.users.toList();
+    return await _dataSource.getAllUsers();
   }
 
   @override
   Future<User?> getUserById(String id) async {
+    final users = await getAllUsers();
     try {
-      return _dataSource.users.firstWhere((user) => user.id == id);
+      return users.firstWhere((user) => user.id == id);
     } catch (e) {
       return null;
     }
@@ -23,8 +24,9 @@ class UserRepositoryImpl implements UserRepository {
 
   @override
   Future<User?> getUserByEmail(String email) async {
+    final users = await getAllUsers();
     try {
-      return _dataSource.users.firstWhere((user) => user.email == email);
+      return users.firstWhere((user) => user.email.toLowerCase() == email.toLowerCase());
     } catch (e) {
       return null;
     }
@@ -32,20 +34,50 @@ class UserRepositoryImpl implements UserRepository {
 
   @override
   Future<void> addUser(User user) async {
-    _dataSource.users.add(user);
+    await _dataSource.saveUser(user);
   }
 
   @override
   Future<void> updateUser(User user) async {
-    final index = _dataSource.users.indexWhere((u) => u.id == user.id);
-    if (index != -1) {
-      _dataSource.users[index] = user;
-    }
+    await _dataSource.saveUser(user);
   }
 
   @override
   Future<void> deleteUser(String id) async {
-    _dataSource.users.removeWhere((user) => user.id == id);
+    final currentUser = await getCurrentUser();
+    if (currentUser?.id == id) {
+      await logout();
+    }
+  }
+
+  /// Выполнить вход пользователя
+  @override
+  Future<bool> login(String email, String password) async {
+    final user = await getUserByEmail(email);
+    if (user != null && user.password == password) {
+      await _dataSource.saveUser(user);
+      await _dataSource.setLoggedIn(true);
+      return true;
+    }
+    return false;
+  }
+
+  /// Выйти из аккаунта
+  @override
+  Future<void> logout() async {
+    await _dataSource.logout();
+  }
+
+
+  /// Получить текущего авторизованного пользователя
+  @override
+  Future<User?> getCurrentUser() async {
+    return await _dataSource.getCurrentUser();
+  }
+
+  /// Проверить, авторизован ли пользователь
+  @override
+  Future<bool> isLoggedIn() async {
+    return await _dataSource.isLoggedIn();
   }
 }
-

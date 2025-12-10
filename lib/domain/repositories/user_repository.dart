@@ -7,5 +7,11 @@ abstract class UserRepository {
   Future<void> addUser(User user);
   Future<void> updateUser(User user);
   Future<void> deleteUser(String id);
+  
+  // Новые методы для авторизации
+  Future<bool> login(String email, String password);
+  Future<void> logout();
+  Future<User?> getCurrentUser();
+  Future<bool> isLoggedIn();
 }
 

@@ -1,6 +1,8 @@
 // screens/main_menu_screen.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:get_it/get_it.dart';
+import 'package:prack_10/domain/repositories/user_repository.dart';
 
 class MainMenuScreen extends StatelessWidget {
   const MainMenuScreen({super.key});
@@ -10,6 +12,16 @@ class MainMenuScreen extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Выйти',
+            onPressed: () => _handleLogout(context),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Stack(
           children: [
@@ -17,7 +29,7 @@ class MainMenuScreen extends StatelessWidget {
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 children: [
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 20),
                   Text(
                     'Твой путь к лучшей версии себя',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -112,6 +124,34 @@ class MainMenuScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Выход'),
+        content: const Text('Вы уверены, что хотите выйти из аккаунта?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Отмена'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Выйти'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      final userRepository = GetIt.I<UserRepository>();
+      await userRepository.logout();
+      if (context.mounted) {
+        context.go('/login');
+      }
+    }
   }
 
   Widget _buildMenuTile({
