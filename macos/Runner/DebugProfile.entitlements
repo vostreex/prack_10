@@ -12,7 +12,6 @@
 
     <key>com.apple.security.network.client</key>
     <true/>
-
     <!-- Allow local network server (required by Flutter) -->
     <key>com.apple.security.network.server</key>
     <true/>

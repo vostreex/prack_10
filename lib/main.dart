@@ -9,6 +9,9 @@ import 'package:prack_10/data/datasources/local/user_local_datasource.dart';
 import 'package:prack_10/data/datasources/local/reflection_local_datasource.dart';
 import 'package:prack_10/data/datasources/remote/api/dio_client.dart';
 import 'package:prack_10/data/datasources/remote/api/supabase_auth_datasource.dart';
+import 'package:prack_10/data/datasources/remote/api/zenquotes_api_client.dart';
+import 'package:prack_10/data/datasources/remote/motivation_remote_datasource.dart';
+import 'package:dio/dio.dart';
 import 'package:prack_10/data/repositories/note_repository_impl.dart';
 import 'package:prack_10/data/repositories/task_repository_impl.dart';
 import 'package:prack_10/data/repositories/habit_repository_impl.dart';
@@ -53,6 +56,15 @@ void main() async {
   GetIt.I.registerLazySingleton<SupabaseAuthDataSource>(
     () => SupabaseAuthDataSource(GetIt.I<SupabaseDioClient>()),
   );
+  
+  // Register ZenQuotes API client
+  GetIt.I.registerLazySingleton<Dio>(() => Dio());
+  GetIt.I.registerLazySingleton<ZenQuotesApiClient>(
+    () => ZenQuotesApiClient(GetIt.I<Dio>()),
+  );
+  GetIt.I.registerLazySingleton<MotivationRemoteDataSource>(
+    () => MotivationRemoteDataSource(GetIt.I<ZenQuotesApiClient>()),
+  );
 
   // Register repositories
   final noteRepository = NoteRepositoryImpl(GetIt.I<NoteLocalDataSource>());
@@ -64,7 +76,10 @@ void main() async {
   );
   final reflectionRepository = ReflectionRepositoryImpl(GetIt.I<ReflectionLocalDataSource>());
   final settingsRepository = SettingsRepositoryImpl(GetIt.I<SettingsLocalDataSource>());
-  final motivationRepository = MotivationRepositoryImpl(GetIt.I<MotivationLocalDataSource>());
+  final motivationRepository = MotivationRepositoryImpl(
+    GetIt.I<MotivationLocalDataSource>(),
+    GetIt.I<MotivationRemoteDataSource>(),
+  );
 
   GetIt.I.registerLazySingleton<NoteRepository>(() => noteRepository);
   GetIt.I.registerLazySingleton<TaskRepository>(() => taskRepository);
@@ -127,6 +142,10 @@ void main() async {
   GetIt.I.registerLazySingleton<GetQuotesByCategoryUseCase>(() => GetQuotesByCategoryUseCase(motivationRepository));
   GetIt.I.registerLazySingleton<GetFactsByCategoryUseCase>(() => GetFactsByCategoryUseCase(motivationRepository));
   GetIt.I.registerLazySingleton<GetMotivationCategoriesUseCase>(() => GetMotivationCategoriesUseCase(motivationRepository));
+  GetIt.I.registerLazySingleton<GetRandomQuoteUseCase>(() => GetRandomQuoteUseCase(motivationRepository));
+  GetIt.I.registerLazySingleton<GetQuoteOfTheDayUseCase>(() => GetQuoteOfTheDayUseCase(motivationRepository));
+  GetIt.I.registerLazySingleton<SearchQuotesUseCase>(() => SearchQuotesUseCase(motivationRepository));
+  GetIt.I.registerLazySingleton<GetQuotesByAuthorUseCase>(() => GetQuotesByAuthorUseCase(motivationRepository));
 
   final settingsStore = SettingsStore();
   await settingsStore.init();   // <-- ОЧЕНЬ ВАЖНО!!!

@@ -12,7 +12,6 @@
 
     <key>com.apple.security.network.client</key>
     <true/>
-
     <!-- Required access groups for secure storage -->
     <key>keychain-access-groups</key>
     <array>
