@@ -1,14 +1,16 @@
 import 'package:prack_10/core/models/user.dart';
 import 'package:prack_10/domain/repositories/user_repository.dart';
 import 'package:prack_10/data/datasources/local/user_local_datasource.dart';
-import 'package:prack_10/data/datasources/remote/api/supabase_auth_api.dart';
-import 'package:prack_10/data/datasources/remote/api/supabase_auth_api.dart' as api;
+import 'package:prack_10/data/datasources/remote/api/supabase_auth_datasource.dart';
+import 'package:prack_10/data/datasources/remote/api/exceptions.dart';
+import 'package:prack_10/data/mappers/auth/auth_mapper.dart';
+import 'package:prack_10/data/dtos/auth/supabase_user_dto.dart';
 
 class UserRepositoryImpl implements UserRepository {
   final UserLocalDataSource _dataSource;
-  final SupabaseAuthApi _authApi;
+  final SupabaseAuthDataSource _authDataSource;
 
-  UserRepositoryImpl(this._dataSource, this._authApi);
+  UserRepositoryImpl(this._dataSource, this._authDataSource);
 
   @override
   Future<List<User>> getAllUsers() async {
@@ -60,7 +62,7 @@ class UserRepositoryImpl implements UserRepository {
     String? name,
   }) async {
     try {
-      final response = await _authApi.signUp(
+      final response = await _authDataSource.signUp(
         email: email,
         password: password,
       );
@@ -75,8 +77,9 @@ class UserRepositoryImpl implements UserRepository {
       );
 
       // Получаем полную информацию о пользователе
-      final user = await getUser(response.accessToken);
-      if (user != null && name != null) {
+      final userDto = await getUserDto(response.accessToken);
+      if (userDto != null && name != null) {
+        final user = AuthMapper.userFromSupabaseUserDto(userDto);
         await _dataSource.saveUser(User(
           id: user.id,
           name: name,
@@ -86,7 +89,7 @@ class UserRepositoryImpl implements UserRepository {
       }
 
       return true;
-    } on api.AuthException catch (e) {
+    } on SupabaseAuthException catch (e) {
       throw Exception(e.message);
     } catch (e) {
       throw Exception('Ошибка регистрации: ${e.toString()}');
@@ -97,7 +100,7 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<bool> login(String email, String password) async {
     try {
-      final response = await _authApi.signIn(
+      final response = await _authDataSource.signIn(
         email: email,
         password: password,
       );
@@ -111,18 +114,14 @@ class UserRepositoryImpl implements UserRepository {
       );
 
       // Получаем полную информацию о пользователе
-      final user = await getUser(response.accessToken);
-      if (user != null) {
-        await _dataSource.saveUser(User(
-          id: user.id,
-          name: user.name ?? '',
-          email: user.email,
-          password: '',
-        ));
+      final userDto = await getUserDto(response.accessToken);
+      if (userDto != null) {
+        final user = AuthMapper.userFromSupabaseUserDto(userDto);
+        await _dataSource.saveUser(user);
       }
 
       return true;
-    } on api.AuthException catch (e) {
+    } on SupabaseAuthException catch (e) {
       throw Exception(e.message);
     } catch (e) {
       throw Exception('Ошибка входа: ${e.toString()}');
@@ -130,9 +129,9 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   /// Получить информацию о пользователе из Supabase
-  Future<api.SupabaseUser?> getUser(String accessToken) async {
+  Future<SupabaseUserDto?> getUserDto(String accessToken) async {
     try {
-      return await _authApi.getUser(accessToken);
+      return await _authDataSource.getUser(accessToken);
     } catch (e) {
       return null;
     }
@@ -146,7 +145,7 @@ class UserRepositoryImpl implements UserRepository {
         return false;
       }
 
-      final response = await _authApi.refreshToken(refreshToken);
+      final response = await _authDataSource.refreshToken(refreshToken);
 
       // Обновляем токены
       await _dataSource.saveAccessToken(response.accessToken);
@@ -164,7 +163,7 @@ class UserRepositoryImpl implements UserRepository {
     try {
       final accessToken = await _dataSource.getAccessToken();
       if (accessToken != null) {
-        await _authApi.logout(accessToken);
+        await _authDataSource.logout(accessToken);
       }
     } catch (e) {
       // Игнорируем ошибки при logout
@@ -186,18 +185,20 @@ class UserRepositoryImpl implements UserRepository {
     final accessToken = await _dataSource.getAccessToken();
     if (accessToken != null) {
       try {
-        final supabaseUser = await getUser(accessToken);
-        if (supabaseUser != null) {
+        final userDto = await getUserDto(accessToken);
+        if (userDto != null) {
           final localUser = await _dataSource.getCurrentUser();
-          final user = User(
-            id: supabaseUser.id,
-            name: supabaseUser.name ?? localUser?.name ?? '',
-            email: supabaseUser.email,
+          final user = AuthMapper.userFromSupabaseUserDto(userDto);
+          // Сохраняем имя из локальных данных, если оно есть
+          final finalUser = User(
+            id: user.id,
+            name: userDto.name ?? localUser?.name ?? '',
+            email: user.email,
             password: '',
           );
           // Сохраняем обновленные данные
-          await _dataSource.saveUser(user);
-          return user;
+          await _dataSource.saveUser(finalUser);
+          return finalUser;
         }
       } catch (e) {
         // Если токен невалидный, пытаемся обновить его
@@ -206,17 +207,18 @@ class UserRepositoryImpl implements UserRepository {
           final newAccessToken = await _dataSource.getAccessToken();
           if (newAccessToken != null) {
             try {
-              final supabaseUser = await getUser(newAccessToken);
-              if (supabaseUser != null) {
+              final userDto = await getUserDto(newAccessToken);
+              if (userDto != null) {
                 final localUser = await _dataSource.getCurrentUser();
-                final user = User(
-                  id: supabaseUser.id,
-                  name: supabaseUser.name ?? localUser?.name ?? '',
-                  email: supabaseUser.email,
+                final user = AuthMapper.userFromSupabaseUserDto(userDto);
+                final finalUser = User(
+                  id: user.id,
+                  name: userDto.name ?? localUser?.name ?? '',
+                  email: user.email,
                   password: '',
                 );
-                await _dataSource.saveUser(user);
-                return user;
+                await _dataSource.saveUser(finalUser);
+                return finalUser;
               }
             } catch (e) {
               // Если и после обновления токена не удалось, возвращаем локальные данные
@@ -245,11 +247,11 @@ class UserRepositoryImpl implements UserRepository {
     }
 
     try {
-      await _authApi.updatePassword(
+      await _authDataSource.updatePassword(
         accessToken: accessToken,
         newPassword: newPassword,
       );
-    } on api.AuthException catch (e) {
+    } on SupabaseAuthException catch (e) {
       throw Exception(e.message);
     } catch (e) {
       throw Exception('Ошибка смены пароля: ${e.toString()}');

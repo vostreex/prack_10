@@ -7,7 +7,8 @@ import 'package:prack_10/ui/features/motivations/state/motivation_store.dart';
 import 'package:prack_10/data/datasources/local/note_local_datasource.dart';
 import 'package:prack_10/data/datasources/local/user_local_datasource.dart';
 import 'package:prack_10/data/datasources/local/reflection_local_datasource.dart';
-import 'package:prack_10/data/datasources/remote/api/supabase_auth_api.dart';
+import 'package:prack_10/data/datasources/remote/api/dio_client.dart';
+import 'package:prack_10/data/datasources/remote/api/supabase_auth_datasource.dart';
 import 'package:prack_10/data/repositories/note_repository_impl.dart';
 import 'package:prack_10/data/repositories/task_repository_impl.dart';
 import 'package:prack_10/data/repositories/habit_repository_impl.dart';
@@ -48,7 +49,10 @@ void main() async {
   GetIt.I.registerLazySingleton<ReflectionLocalDataSource>(() => ReflectionLocalDataSource());
   GetIt.I.registerLazySingleton<MotivationLocalDataSource>(() => MotivationLocalDataSource());
   GetIt.I.registerLazySingleton<SettingsLocalDataSource>(() => SettingsLocalDataSource());
-  GetIt.I.registerLazySingleton<SupabaseAuthApi>(() => SupabaseAuthApi());
+  GetIt.I.registerLazySingleton<SupabaseDioClient>(() => SupabaseDioClient());
+  GetIt.I.registerLazySingleton<SupabaseAuthDataSource>(
+    () => SupabaseAuthDataSource(GetIt.I<SupabaseDioClient>()),
+  );
 
   // Register repositories
   final noteRepository = NoteRepositoryImpl(GetIt.I<NoteLocalDataSource>());
@@ -56,7 +60,7 @@ void main() async {
   final habitRepository = HabitRepositoryImpl(GetIt.I<HabitLocalDataSource>());
   final userRepository = UserRepositoryImpl(
     GetIt.I<UserLocalDataSource>(),
-    GetIt.I<SupabaseAuthApi>(),
+    GetIt.I<SupabaseAuthDataSource>(),
   );
   final reflectionRepository = ReflectionRepositoryImpl(GetIt.I<ReflectionLocalDataSource>());
   final settingsRepository = SettingsRepositoryImpl(GetIt.I<SettingsLocalDataSource>());
