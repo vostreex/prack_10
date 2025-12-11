@@ -1,6 +1,6 @@
 import 'package:prack_10/core/models/note.dart';
 import 'package:prack_10/domain/repositories/note_repository.dart';
-import 'package:prack_10/data/datasources/note_local_datasource.dart';
+import 'package:prack_10/data/datasources/local/note_local_datasource.dart';
 
 class NoteRepositoryImpl implements NoteRepository {
   final NoteLocalDataSource _dataSource;

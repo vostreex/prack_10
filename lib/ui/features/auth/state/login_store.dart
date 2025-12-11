@@ -33,14 +33,9 @@ abstract class _LoginStore with Store {
 
     try {
       final success = await _userRepository.login(email, password);
-
-      if (!success) {
-        errorMessage = 'Неверный email или пароль';
-      }
-
       return success;
     } catch (e) {
-      errorMessage = 'Ошибка входа';
+      errorMessage = e.toString().replaceAll('Exception: ', '');
       return false;
     } finally {
       isLoading = false;

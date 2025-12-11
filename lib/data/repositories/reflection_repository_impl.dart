@@ -1,6 +1,6 @@
 import 'package:prack_10/core/models/reflection_entry.dart';
 import 'package:prack_10/domain/repositories/reflection_repository.dart';
-import 'package:prack_10/data/datasources/reflection_local_datasource.dart';
+import 'package:prack_10/data/datasources/local/reflection_local_datasource.dart';
 
 class ReflectionRepositoryImpl implements ReflectionRepository {
   final ReflectionLocalDataSource _dataSource;

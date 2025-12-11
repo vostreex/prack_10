@@ -24,8 +24,23 @@ class ProfileScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                if (store.errorMessage != null)
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.red[50],
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.red[300]!),
+                    ),
+                    child: Text(
+                      store.errorMessage!,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
                 TextField(
                   obscureText: !store.isPasswordVisible,
+                  enabled: !store.isLoading,
                   decoration: InputDecoration(
                     labelText: 'Новый пароль',
                     border: const OutlineInputBorder(),
@@ -38,6 +53,7 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 TextField(
                   obscureText: !store.isPasswordVisible,
+                  enabled: !store.isLoading,
                   decoration: InputDecoration(
                     labelText: 'Подтвердите пароль',
                     border: const OutlineInputBorder(),
@@ -54,7 +70,7 @@ class ProfileScreen extends StatelessWidget {
                     const Spacer(),
                     Switch(
                       value: store.isPasswordVisible,
-                      onChanged: (_) => store.togglePasswordVisibility(),
+                      onChanged: store.isLoading ? null : (_) => store.togglePasswordVisibility(),
                     ),
                   ],
                 ),
@@ -64,24 +80,41 @@ class ProfileScreen extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: store.isLoading ? null : () => Navigator.pop(ctx),
             child: const Text('Отмена'),
           ),
           Observer(
             builder: (_) => ElevatedButton(
-              onPressed: store.canSavePassword
-                  ? () {
-                store.changePassword();
-                Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Пароль успешно изменён'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
+              onPressed: store.canSavePassword && !store.isLoading
+                  ? () async {
+                final success = await store.changePassword();
+                if (ctx.mounted) {
+                  Navigator.pop(ctx);
+                  if (success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Пароль успешно изменён'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  } else if (store.errorMessage != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(store.errorMessage!),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
               }
                   : null,
-              child: const Text('Сохранить'),
+              child: store.isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Сохранить'),
             ),
           ),
         ],

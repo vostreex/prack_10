@@ -4,13 +4,10 @@ import 'package:prack_10/ui/app.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:prack_10/ui/features/settings/state/settings_store.dart';
 import 'package:prack_10/ui/features/motivations/state/motivation_store.dart';
-import 'package:prack_10/data/datasources/note_local_datasource.dart';
-import 'package:prack_10/data/datasources/task_local_datasource.dart';
-import 'package:prack_10/data/datasources/habit_local_datasource.dart';
-import 'package:prack_10/data/datasources/user_local_datasource.dart';
-import 'package:prack_10/data/datasources/reflection_local_datasource.dart';
-import 'package:prack_10/data/datasources/motivation_local_datasource.dart';
-import 'package:prack_10/data/datasources/settings_local_datasource.dart';
+import 'package:prack_10/data/datasources/local/note_local_datasource.dart';
+import 'package:prack_10/data/datasources/local/user_local_datasource.dart';
+import 'package:prack_10/data/datasources/local/reflection_local_datasource.dart';
+import 'package:prack_10/data/datasources/remote/api/supabase_auth_api.dart';
 import 'package:prack_10/data/repositories/note_repository_impl.dart';
 import 'package:prack_10/data/repositories/task_repository_impl.dart';
 import 'package:prack_10/data/repositories/habit_repository_impl.dart';
@@ -33,6 +30,11 @@ import 'package:prack_10/domain/usecases/reflections/reflections_usecases.dart';
 import 'package:prack_10/domain/usecases/settings/settings_usecases.dart';
 import 'package:prack_10/domain/usecases/motivations/motivations_usecases.dart';
 
+import 'data/datasources/local/habit_local_datasource.dart';
+import 'data/datasources/local/motivation_local_datasource.dart';
+import 'data/datasources/local/settings_local_datasource.dart';
+import 'data/datasources/local/task_local_datasource.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('ru', null);
@@ -46,12 +48,16 @@ void main() async {
   GetIt.I.registerLazySingleton<ReflectionLocalDataSource>(() => ReflectionLocalDataSource());
   GetIt.I.registerLazySingleton<MotivationLocalDataSource>(() => MotivationLocalDataSource());
   GetIt.I.registerLazySingleton<SettingsLocalDataSource>(() => SettingsLocalDataSource());
+  GetIt.I.registerLazySingleton<SupabaseAuthApi>(() => SupabaseAuthApi());
 
   // Register repositories
   final noteRepository = NoteRepositoryImpl(GetIt.I<NoteLocalDataSource>());
   final taskRepository = TaskRepositoryImpl(GetIt.I<TaskLocalDataSource>());
   final habitRepository = HabitRepositoryImpl(GetIt.I<HabitLocalDataSource>());
-  final userRepository = UserRepositoryImpl(GetIt.I<UserLocalDataSource>());
+  final userRepository = UserRepositoryImpl(
+    GetIt.I<UserLocalDataSource>(),
+    GetIt.I<SupabaseAuthApi>(),
+  );
   final reflectionRepository = ReflectionRepositoryImpl(GetIt.I<ReflectionLocalDataSource>());
   final settingsRepository = SettingsRepositoryImpl(GetIt.I<SettingsLocalDataSource>());
   final motivationRepository = MotivationRepositoryImpl(GetIt.I<MotivationLocalDataSource>());

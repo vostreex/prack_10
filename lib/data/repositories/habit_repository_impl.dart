@@ -1,6 +1,8 @@
 import 'package:prack_10/core/models/habit.dart';
 import 'package:prack_10/domain/repositories/habit_repository.dart';
-import 'package:prack_10/data/datasources/habit_local_datasource.dart';
+
+import '../datasources/local/habit_local_datasource.dart';
+
 
 class HabitRepositoryImpl implements HabitRepository {
   final HabitLocalDataSource _dataSource;

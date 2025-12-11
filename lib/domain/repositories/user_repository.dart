@@ -8,10 +8,16 @@ abstract class UserRepository {
   Future<void> updateUser(User user);
   Future<void> deleteUser(String id);
   
-  // Новые методы для авторизации
+  // Методы для авторизации через Supabase
+  Future<bool> signUp({
+    required String email,
+    required String password,
+    String? name,
+  });
   Future<bool> login(String email, String password);
   Future<void> logout();
   Future<User?> getCurrentUser();
   Future<bool> isLoggedIn();
+  Future<void> updatePassword(String newPassword);
 }
 

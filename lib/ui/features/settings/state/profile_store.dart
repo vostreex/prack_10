@@ -2,32 +2,39 @@
 import 'package:mobx/mobx.dart';
 import 'package:get_it/get_it.dart';
 import 'package:prack_10/core/models/user.dart';
-import 'package:prack_10/domain/usecases/users/get_users_usecase.dart';
-import 'package:prack_10/domain/usecases/users/update_user_usecase.dart';
+import 'package:prack_10/domain/repositories/user_repository.dart';
 
 part 'profile_store.g.dart';
 
 class ProfileStore = _ProfileStore with _$ProfileStore;
 
 abstract class _ProfileStore with Store {
-  final GetUsersUseCase _getUsersUseCase = GetIt.I<GetUsersUseCase>();
-  final UpdateUserUseCase _updateUserUseCase = GetIt.I<UpdateUserUseCase>();
+  final UserRepository _userRepository = GetIt.I<UserRepository>();
 
   @observable
-  ObservableList<User> users = ObservableList<User>();
+  User? currentUser;
+
+  @observable
+  bool isLoading = false;
+
+  @observable
+  String? errorMessage;
 
   _ProfileStore() {
-    _loadUsers();
+    _loadUser();
   }
 
   @action
-  Future<void> _loadUsers() async {
-    final usersList = await _getUsersUseCase();
-    users = ObservableList<User>.of(usersList);
+  Future<void> _loadUser() async {
+    isLoading = true;
+    try {
+      currentUser = await _userRepository.getCurrentUser();
+    } catch (e) {
+      errorMessage = 'Ошибка загрузки профиля';
+    } finally {
+      isLoading = false;
+    }
   }
-
-  @computed
-  User? get currentUser => users.isEmpty ? null : users.first;
 
   @computed
   String get userName => currentUser?.name ?? 'Гость';
@@ -57,18 +64,26 @@ abstract class _ProfileStore with Store {
   void togglePasswordVisibility() => isPasswordVisible = !isPasswordVisible;
 
   @action
-  Future<void> changePassword() async {
-    if (currentUser == null) return;
-    if (!canSavePassword) return;
+  Future<bool> changePassword() async {
+    if (!canSavePassword) return false;
 
-    final user = currentUser!;
-    final updatedUser = user.copyWith(password: newPassword);
-    await _updateUserUseCase(updatedUser);
-    await _loadUsers();
+    isLoading = true;
+    errorMessage = null;
 
-    newPassword = '';
-    confirmPassword = '';
-    isPasswordVisible = false;
+    try {
+      await _userRepository.updatePassword(newPassword);
+      
+      newPassword = '';
+      confirmPassword = '';
+      isPasswordVisible = false;
+      
+      return true;
+    } catch (e) {
+      errorMessage = e.toString().replaceAll('Exception: ', '');
+      return false;
+    } finally {
+      isLoading = false;
+    }
   }
 
   @computed

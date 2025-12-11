@@ -1,6 +1,7 @@
 import 'package:prack_10/core/models/task.dart';
 import 'package:prack_10/domain/repositories/task_repository.dart';
-import 'package:prack_10/data/datasources/task_local_datasource.dart';
+
+import '../datasources/local/task_local_datasource.dart';
 
 class TaskRepositoryImpl implements TaskRepository {
   final TaskLocalDataSource _dataSource;

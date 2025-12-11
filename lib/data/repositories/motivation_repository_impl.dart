@@ -1,5 +1,6 @@
 import 'package:prack_10/domain/repositories/motivation_repository.dart';
-import 'package:prack_10/data/datasources/motivation_local_datasource.dart';
+
+import '../datasources/local/motivation_local_datasource.dart';
 
 class MotivationRepositoryImpl implements MotivationRepository {
   final MotivationLocalDataSource _dataSource;

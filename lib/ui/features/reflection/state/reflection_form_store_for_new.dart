@@ -1,7 +1,7 @@
 import 'package:mobx/mobx.dart';
 import 'package:get_it/get_it.dart';
 import 'package:prack_10/core/models/reflection_entry.dart';
-import 'package:prack_10/data/datasources/reflection_local_datasource.dart';
+import 'package:prack_10/data/datasources/local/reflection_local_datasource.dart';
 import 'package:prack_10/domain/usecases/reflections/add_reflection_usecase.dart';
 import 'package:prack_10/domain/usecases/reflections/update_reflection_usecase.dart';
 

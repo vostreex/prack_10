@@ -9,13 +9,6 @@ part of 'profile_store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$ProfileStore on _ProfileStore, Store {
-  Computed<User?>? _$currentUserComputed;
-
-  @override
-  User? get currentUser => (_$currentUserComputed ??= Computed<User?>(
-    () => super.currentUser,
-    name: '_ProfileStore.currentUser',
-  )).value;
   Computed<String>? _$userNameComputed;
 
   @override
@@ -45,18 +38,57 @@ mixin _$ProfileStore on _ProfileStore, Store {
     name: '_ProfileStore.canSavePassword',
   )).value;
 
-  late final _$usersAtom = Atom(name: '_ProfileStore.users', context: context);
+  late final _$currentUserAtom = Atom(
+    name: '_ProfileStore.currentUser',
+    context: context,
+  );
 
   @override
-  ObservableList<User> get users {
-    _$usersAtom.reportRead();
-    return super.users;
+  User? get currentUser {
+    _$currentUserAtom.reportRead();
+    return super.currentUser;
   }
 
   @override
-  set users(ObservableList<User> value) {
-    _$usersAtom.reportWrite(value, super.users, () {
-      super.users = value;
+  set currentUser(User? value) {
+    _$currentUserAtom.reportWrite(value, super.currentUser, () {
+      super.currentUser = value;
+    });
+  }
+
+  late final _$isLoadingAtom = Atom(
+    name: '_ProfileStore.isLoading',
+    context: context,
+  );
+
+  @override
+  bool get isLoading {
+    _$isLoadingAtom.reportRead();
+    return super.isLoading;
+  }
+
+  @override
+  set isLoading(bool value) {
+    _$isLoadingAtom.reportWrite(value, super.isLoading, () {
+      super.isLoading = value;
+    });
+  }
+
+  late final _$errorMessageAtom = Atom(
+    name: '_ProfileStore.errorMessage',
+    context: context,
+  );
+
+  @override
+  String? get errorMessage {
+    _$errorMessageAtom.reportRead();
+    return super.errorMessage;
+  }
+
+  @override
+  set errorMessage(String? value) {
+    _$errorMessageAtom.reportWrite(value, super.errorMessage, () {
+      super.errorMessage = value;
     });
   }
 
@@ -114,14 +146,14 @@ mixin _$ProfileStore on _ProfileStore, Store {
     });
   }
 
-  late final _$_loadUsersAsyncAction = AsyncAction(
-    '_ProfileStore._loadUsers',
+  late final _$_loadUserAsyncAction = AsyncAction(
+    '_ProfileStore._loadUser',
     context: context,
   );
 
   @override
-  Future<void> _loadUsers() {
-    return _$_loadUsersAsyncAction.run(() => super._loadUsers());
+  Future<void> _loadUser() {
+    return _$_loadUserAsyncAction.run(() => super._loadUser());
   }
 
   late final _$changePasswordAsyncAction = AsyncAction(
@@ -130,7 +162,7 @@ mixin _$ProfileStore on _ProfileStore, Store {
   );
 
   @override
-  Future<void> changePassword() {
+  Future<bool> changePassword() {
     return _$changePasswordAsyncAction.run(() => super.changePassword());
   }
 
@@ -178,11 +210,12 @@ mixin _$ProfileStore on _ProfileStore, Store {
   @override
   String toString() {
     return '''
-users: ${users},
+currentUser: ${currentUser},
+isLoading: ${isLoading},
+errorMessage: ${errorMessage},
 newPassword: ${newPassword},
 confirmPassword: ${confirmPassword},
 isPasswordVisible: ${isPasswordVisible},
-currentUser: ${currentUser},
 userName: ${userName},
 userEmail: ${userEmail},
 initials: ${initials},

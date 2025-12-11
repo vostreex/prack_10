@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:prack_10/data/datasources/note_local_datasource.dart';
+import 'package:prack_10/data/datasources/local/note_local_datasource.dart';
 
 class CategoryDropdown extends StatelessWidget {
   final String value;

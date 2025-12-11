@@ -40,6 +40,33 @@ class UserLocalDataSource {
     await _storage.write(key: _keyUserPassword, value: user.password);
   }
 
+  /// Сохранить данные авторизации от Supabase
+  Future<void> saveAuthData({
+    required String accessToken,
+    required String refreshToken,
+    required String userId,
+    required String email,
+    String? name,
+  }) async {
+    await _storage.write(key: _keyAccessToken, value: accessToken);
+    await _storage.write(key: _keyRefreshToken, value: refreshToken);
+    await _storage.write(key: _keyUserId, value: userId);
+    await _storage.write(key: _keyUserEmail, value: email);
+    if (name != null) {
+      await _storage.write(key: _keyUserName, value: name);
+    }
+    await _storage.write(key: _keyIsLoggedIn, value: 'true');
+    
+    // Сохраняем пользователя для совместимости
+    final user = User(
+      id: userId,
+      name: name ?? '',
+      email: email,
+      password: '', // Пароль не храним
+    );
+    await saveUser(user);
+  }
+
   /// Получить текущего пользователя из secure storage
   Future<User?> getCurrentUser() async {
     try {
@@ -103,7 +130,8 @@ class UserLocalDataSource {
   /// Проверить, авторизован ли пользователь
   Future<bool> isLoggedIn() async {
     final value = await _storage.read(key: _keyIsLoggedIn);
-    return value == 'true';
+    final accessToken = await getAccessToken();
+    return value == 'true' && accessToken != null;
   }
 
   /// Очистить все данные пользователя (logout)

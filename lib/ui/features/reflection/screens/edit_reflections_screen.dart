@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:prack_10/core/models/reflection_entry.dart';
 import 'package:prack_10/ui/features/reflection/state/reflections_form_store_for_editing.dart';
 import 'package:get_it/get_it.dart';
-import 'package:prack_10/data/datasources/reflection_local_datasource.dart';
+import 'package:prack_10/data/datasources/local/reflection_local_datasource.dart';
 
 class ReflectionEditScreen extends StatelessWidget {
   final ReflectionEntry reflection;

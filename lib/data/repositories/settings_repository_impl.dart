@@ -1,6 +1,7 @@
 import 'package:prack_10/core/models/app_settings.dart';
 import 'package:prack_10/domain/repositories/settings_repository.dart';
-import 'package:prack_10/data/datasources/settings_local_datasource.dart';
+
+import '../datasources/local/settings_local_datasource.dart';
 
 class SettingsRepositoryImpl implements SettingsRepository {
   final SettingsLocalDataSource _dataSource;
